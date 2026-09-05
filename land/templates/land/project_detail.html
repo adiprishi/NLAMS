@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>{{ project.project_name }} - NLAMS</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            margin-bottom: 10px;
+        }
+
+        .details {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .item {
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 6px;
+        }
+
+        .label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .value {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .workflow {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        .step {
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 5px solid #d1d5db;
+            background: #f9fafb;
+        }
+
+        .current {
+            border-left-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .back {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #2563eb;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="/projects/" class="back">
+        ← Back to Projects
+    </a>
+
+    <div class="header">
+
+        <h1>{{ project.project_name }}</h1>
+
+        <p>
+            {{ project.project_type }} |
+            {{ project.state }} |
+            {{ project.district }}
+        </p>
+
+    </div>
+
+
+    <div class="details">
+
+        <h2>Project Information</h2>
+
+        <br>
+
+        <div class="row">
+
+            <div class="item">
+
+                <div class="label">
+                    Project Type
+                </div>
+
+                <div class="value">
+                    {{ project.project_type }}
+                </div>
+
+            </div>
+
+
+            <div class="item">
+
+                <div class="label">
+                    State
+                </div>
+
+                <div class="value">
+                    {{ project.state }}
+                </div>
+
+            </div>
+
+
+            <div class="item">
+
+                <div class="label">
+                    District
+                </div>
+
+                <div class="value">
+                    {{ project.district }}
+                </div>
+
+            </div>
+
+
+            <div class="item">
+
+                <div class="label">
+                    Land Required
+                </div>
+
+                <div class="value">
+                    {{ project.land_required }} Acres
+                </div>
+
+            </div>
+
+
+            <div class="item">
+
+                <div class="label">
+                    Current Status
+                </div>
+
+                <div class="value">
+                    {{ project.get_status_display }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="workflow">
+
+        <h2>Acquisition Workflow</h2>
+
+        <div class="step current">
+            ✓ Proposal Submitted
+        </div>
+
+        <div class="step">
+            District Verification
+        </div>
+
+        <div class="step">
+            State Review
+        </div>
+
+        <div class="step">
+            Approval
+        </div>
+
+        <div class="step">
+            Land Acquisition
+        </div>
+
+        <div class="step">
+            Compensation
+        </div>
+
+        <div class="step">
+            Possession
+        </div>
+
+        <div class="step">
+            Rehabilitation & Resettlement
+        </div>
+        <br>
+
+        <h3>Officer Action</h3>
+
+        <form method="POST"
+              <form method="POST" action="{% url 'update_status' project.id %}">
+
+             {% csrf_token %}
+
+             <select name="status">
+
+                <option value="SUBMITTED">
+                    Submitted
+                </option>
+
+                <option value="UNDER_REVIEW">
+                    Under Review
+                </option>
+
+                <option value="APPROVED">
+                    Approved
+                </option>
+
+                <option value="ACQUISITION">
+                    Acquisition
+                </option>
+
+                <option value="COMPLETED">
+                     Completed
+                </option>
+
+            </select>
+
+            <button type="submit">
+                Update Status
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

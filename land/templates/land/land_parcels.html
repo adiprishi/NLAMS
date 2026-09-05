@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>NLAMS - Land Parcels</title>
+
+    <style>
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+        }
+
+        .header {
+            background: #172033;
+            color: white;
+            padding: 20px 30px;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .button {
+            background: #1769aa;
+            color: white;
+            padding: 12px 18px;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        th, td {
+            padding: 14px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #eef2f7;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+    <h2>NLAMS - Land Parcels</h2>
+</div>
+
+<div class="container">
+
+    <div class="top">
+
+        <div>
+            <h2>Land Parcel Management</h2>
+            <p>View and manage land parcels associated with projects.</p>
+        </div>
+
+        <a href="{% url 'create_parcel' %}" class="button">
+            + Add Land Parcel
+        </a>
+
+    </div>
+
+
+    <table>
+
+        <tr>
+            <th>Parcel ID</th>
+            <th>Project</th>
+            <th>Owner</th>
+            <th>Area (Acres)</th>
+            <th>Location</th>
+            <th>Status</th>
+        </tr>
+
+        {% for parcel in parcels %}
+
+        <tr>
+
+            <td>{{ parcel.parcel_id }}</td>
+
+            <td>{{ parcel.project.project_name }}</td>
+
+            <td>{{ parcel.owner_name }}</td>
+
+            <td>{{ parcel.area }}</td>
+
+            <td>
+                {{ parcel.latitude }},
+                {{ parcel.longitude }}
+            </td>
+
+            <td class="status">
+                {{ parcel.get_status_display }}
+            </td>
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="6">
+                No land parcels available.
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+</div>
+
+</body>
+</html>

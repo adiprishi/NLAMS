@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Compensation | NLAMS</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f9;
+        }
+
+        .header {
+            background: #1f4e79;
+            color: white;
+            padding: 20px 30px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            background: #1f4e79;
+            color: white;
+            padding: 12px 18px;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .btn:hover {
+            background: #163a5c;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #eef3f8;
+        }
+
+        .status {
+            padding: 6px 10px;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .paid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .partial {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .pending {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>💰 Compensation Management</h1>
+    <p>Track land acquisition compensation and payments</p>
+</div>
+
+<div class="container">
+
+    <div class="top-bar">
+
+        <div>
+            <h2>Compensation Records</h2>
+        </div>
+
+        <a href="{% url 'create_compensation' %}" class="btn">
+            + Add Compensation
+        </a>
+
+    </div>
+
+    <div class="card">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Parcel ID</th>
+                    <th>Land Owner</th>
+                    <th>Assessed Amount</th>
+                    <th>Paid Amount</th>
+                    <th>Remaining</th>
+                    <th>Status</th>
+                    <th>Payment Date</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for compensation in compensations %}
+
+                <tr>
+
+                    <td>
+                        {{ compensation.parcel.parcel_id }}
+                    </td>
+
+                    <td>
+                        {{ compensation.parcel.owner_name }}
+                    </td>
+
+                    <td>
+                        ₹{{ compensation.assessed_amount }}
+                    </td>
+
+                    <td>
+                        ₹{{ compensation.paid_amount }}
+                    </td>
+
+                    <td>
+                        ₹{{ compensation.remaining_amount }}
+                    </td>
+
+                    <td>
+
+                        {% if compensation.payment_status == "PAID" %}
+
+                            <span class="status paid">
+                                Fully Paid
+                            </span>
+
+                        {% elif compensation.payment_status == "PARTIAL" %}
+
+                            <span class="status partial">
+                                Partially Paid
+                            </span>
+
+                        {% else %}
+
+                            <span class="status pending">
+                                Pending
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+                        {{ compensation.payment_date|default:"Not Paid" }}
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="7" style="text-align:center;">
+                        No compensation records available.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

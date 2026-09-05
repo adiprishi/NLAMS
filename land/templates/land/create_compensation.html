@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>NLAMS - Add Compensation</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+        }
+
+        .header {
+            background: #1f2937;
+            color: white;
+            padding: 20px 30px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 11px;
+            margin-top: 7px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 100px;
+        }
+
+        button {
+            margin-top: 25px;
+            padding: 12px 25px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 15px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+    <h2>NLAMS - Add Compensation</h2>
+</div>
+
+<div class="container">
+
+    <h2>Compensation Information</h2>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <label>Land Parcel</label>
+
+        <select name="parcel" required>
+
+            <option value="">Select Land Parcel</option>
+
+            {% for parcel in parcels %}
+
+            <option value="{{ parcel.id }}">
+                {{ parcel.parcel_id }} - {{ parcel.owner_name }}
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <label>Assessed Amount (₹)</label>
+
+        <input
+            type="number"
+            name="assessed_amount"
+            step="0.01"
+            required
+        >
+
+
+        <label>Paid Amount (₹)</label>
+
+        <input
+            type="number"
+            name="paid_amount"
+            step="0.01"
+            value="0"
+            required
+        >
+
+
+        <label>Payment Status</label>
+
+        <select name="payment_status" required>
+
+            <option value="PENDING">Pending</option>
+            <option value="PARTIAL">Partially Paid</option>
+            <option value="PAID">Fully Paid</option>
+
+        </select>
+
+
+        <label>Payment Date</label>
+
+        <input
+            type="date"
+            name="payment_date"
+        >
+
+
+        <label>Remarks</label>
+
+        <textarea
+            name="remarks"
+            placeholder="Enter remarks"
+        ></textarea>
+
+
+        <button type="submit">
+            Save Compensation
+        </button>
+
+    </form>
+
+    <a href="{% url 'compensation_list' %}" class="back">
+        ← Back to Compensation
+    </a>
+
+</div>
+
+</body>
+</html>

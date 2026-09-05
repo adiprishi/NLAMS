@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NLAMS - Land Parcel Map</title>
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            background: #172033;
+            color: white;
+            padding: 18px 25px;
+        }
+
+        .header h2 {
+            margin: 0;
+        }
+
+        .map-container {
+            padding: 20px;
+        }
+
+        #map {
+            height: 600px;
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .info {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h2>NLAMS - GIS Land Parcel Map</h2>
+</div>
+
+<div class="map-container">
+
+    <div class="info">
+        <h3>Land Parcels</h3>
+        <p>Interactive visualization of acquired and proposed land parcels.</p>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="parcel-data" hidden>
+        {% for parcel in parcels %}
+            <div
+                class="parcel"
+                data-latitude="{{ parcel.latitude }}"
+                data-longitude="{{ parcel.longitude }}"
+                data-parcel-id="{{ parcel.parcel_id|escape }}"
+                data-owner="{{ parcel.owner_name|escape }}"
+                data-area="{{ parcel.area|escape }}"
+                data-status="{{ parcel.get_status_display|escape }}"
+            ></div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+    // Center map around Assam
+    var map = L.map('map').setView([26.1445, 91.7362], 12);
+
+    // OpenStreetMap layer
+    L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+            attribution: '&copy; OpenStreetMap contributors'
+        }
+    ).addTo(map);
+
+
+    // Function to select marker color
+    function getMarkerColor(status) {
+
+        if (status === 'Identified') {
+            return 'gold';
+        }
+
+        if (status === 'Verified') {
+            return 'blue';
+        }
+
+        if (status === 'Notified') {
+            return 'orange';
+        }
+
+        if (status === 'Acquired') {
+            return 'green';
+        }
+
+        if (status === 'Possession Taken') {
+            return 'purple';
+        }
+
+        return 'blue';
+    }
+
+
+    // Add parcels from the data rendered by Django.
+    document.querySelectorAll('#parcel-data .parcel').forEach(function (parcel) {
+        var latitude = parseFloat(parcel.dataset.latitude);
+        var longitude = parseFloat(parcel.dataset.longitude);
+        var status = parcel.dataset.status;
+        var markerColor = getMarkerColor(status);
+
+        var marker = L.circleMarker([latitude, longitude], {
+            radius: 10,
+            color: markerColor,
+            fillColor: markerColor,
+            fillOpacity: 0.8,
+            weight: 2
+        }).addTo(map);
+
+        marker.bindPopup(
+            '<b>Parcel ID:</b> ' + parcel.dataset.parcelId + '<br>' +
+            '<b>Owner:</b> ' + parcel.dataset.owner + '<br>' +
+            '<b>Area:</b> ' + parcel.dataset.area + ' acres<br>' +
+            '<b>Status:</b> ' + status
+        );
+    });
+
+
+    // Map legend
+    var legend = L.control({position: 'bottomright'});
+
+    legend.onAdd = function(map) {
+
+        var div = L.DomUtil.create('div', 'info legend');
+
+        div.style.background = 'white';
+        div.style.padding = '12px';
+        div.style.borderRadius = '8px';
+        div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+
+        div.innerHTML = `
+            <b>Land Acquisition Status</b><br><br>
+
+            <span style="color:gold;">●</span> Identified<br>
+            <span style="color:blue;">●</span> Verified<br>
+            <span style="color:orange;">●</span> Notified<br>
+            <span style="color:green;">●</span> Acquired<br>
+            <span style="color:purple;">●</span> Possession Taken
+        `;
+
+        return div;
+    };
+
+    legend.addTo(map);
+
+</script>
+
+</body>
+</html>

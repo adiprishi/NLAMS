@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>NLAMS - Add Land Parcel</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            margin: 0;
+        }
+
+        .header {
+            background: #172033;
+            color: white;
+            padding: 20px 30px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px;
+            margin-top: 7px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 25px;
+            padding: 12px 25px;
+            background: #1769aa;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 15px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+    <h2>NLAMS - Add Land Parcel</h2>
+</div>
+
+<div class="container">
+
+    <h2>Land Parcel Information</h2>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <label>Project</label>
+
+        <select name="project" required>
+
+            <option value="">Select Project</option>
+
+            {% for project in projects %}
+
+            <option value="{{ project.id }}">
+                {{ project.project_name }}
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <label>Parcel ID</label>
+
+        <input
+            type="text"
+            name="parcel_id"
+            placeholder="Example: ASSAM-KAM-004"
+            required
+        >
+
+
+        <label>Owner Name</label>
+
+        <input
+            type="text"
+            name="owner_name"
+            placeholder="Enter land owner name"
+            required
+        >
+
+
+        <label>Area (Acres)</label>
+
+        <input
+            type="number"
+            name="area"
+            step="0.01"
+            required
+        >
+
+
+        <label>Latitude</label>
+
+        <input
+            type="number"
+            name="latitude"
+            step="0.000001"
+            placeholder="Example: 26.1445"
+            required
+        >
+
+
+        <label>Longitude</label>
+
+        <input
+            type="number"
+            name="longitude"
+            step="0.000001"
+            placeholder="Example: 91.7362"
+            required
+        >
+
+
+        <label>Acquisition Status</label>
+
+        <select name="status" required>
+
+            <option value="IDENTIFIED">Identified</option>
+            <option value="VERIFIED">Verified</option>
+            <option value="NOTIFIED">Notified</option>
+            <option value="ACQUIRED">Acquired</option>
+            <option value="POSSESSION">Possession Taken</option>
+
+        </select>
+
+
+        <button type="submit">
+            Save Land Parcel
+        </button>
+
+    </form>
+
+    <a href="{% url 'land_parcels' %}" class="back">
+        ← Back to Land Parcels
+    </a>
+
+</div>
+
+</body>
+
+</html>

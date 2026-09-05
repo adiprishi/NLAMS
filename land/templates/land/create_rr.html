@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add R&R Case | NLAMS</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+        }
+
+        .header {
+            background: #1f4e79;
+            color: white;
+            padding: 20px 30px;
+        }
+
+        .container {
+            width: 700px;
+            max-width: 90%;
+            margin: 40px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 100px;
+        }
+
+        .checkbox {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        .btn {
+            margin-top: 25px;
+            background: #1f4e79;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 20px;
+            color: #1f4e79;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>🏠 Add R&R Case</h1>
+</div>
+
+<div class="container">
+
+    <div class="card">
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <label>Project</label>
+
+            <select name="project" required>
+
+                <option value="">Select Project</option>
+
+                {% for project in projects %}
+
+                    <option value="{{ project.id }}">
+                        {{ project.project_name }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+
+            <label>Family ID</label>
+
+            <input
+                type="text"
+                name="family_id"
+                placeholder="Example: FAM-001"
+                required
+            >
+
+
+            <label>Family Name</label>
+
+            <input
+                type="text"
+                name="family_name"
+                placeholder="Enter family name"
+                required
+            >
+
+
+            <label>
+
+                <input
+                    type="checkbox"
+                    name="displaced"
+                    class="checkbox"
+                >
+
+                Family Displaced
+
+            </label>
+
+
+            <label>Rehabilitation Status</label>
+
+            <select name="rehabilitation_status" required>
+
+                <option value="PENDING">
+                    Pending
+                </option>
+
+                <option value="IN_PROGRESS">
+                    In Progress
+                </option>
+
+                <option value="COMPLETED">
+                    Completed
+                </option>
+
+            </select>
+
+
+            <label>Assistance Amount</label>
+
+            <input
+                type="number"
+                name="assistance_amount"
+                step="0.01"
+                value="0"
+            >
+
+
+            <label>Remarks</label>
+
+            <textarea
+                name="remarks"
+                placeholder="Enter additional information"
+            ></textarea>
+
+
+            <button type="submit" class="btn">
+                Save R&R Case
+            </button>
+
+        </form>
+
+        <a href="{% url 'rr_list' %}" class="back">
+            ← Back to R&R Records
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

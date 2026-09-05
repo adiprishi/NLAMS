@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Projects - NLAMS</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+        }
+
+        .sidebar {
+            position: fixed;
+            width: 230px;
+            height: 100vh;
+            background: #1f2937;
+            color: white;
+            padding: 25px 15px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 35px;
+        }
+
+        .menu {
+            list-style: none;
+        }
+
+        .menu li {
+            padding: 14px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+        }
+
+        .menu li:hover {
+            background: #374151;
+        }
+
+        .menu a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .main {
+            margin-left: 230px;
+            padding: 30px;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .top h1 {
+            color: #111827;
+        }
+
+        .btn {
+            background: #2563eb;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+
+        .project-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            color: #374151;
+        }
+
+        .status {
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 700px) {
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <!-- SIDEBAR -->
+
+    <div class="sidebar">
+
+        <div class="logo">
+            🏛️ NLAMS
+        </div>
+
+        <ul class="menu">
+
+            <li>
+                <a href="/">📊 Dashboard</a>
+            </li>
+
+            <li>
+                <a href="/projects/">📁 Projects</a>
+            </li>
+
+            <li>🗺️ Land Parcels</li>
+
+            <li>💰 Compensation</li>
+
+            <li>🏠 R&R</li>
+
+            <li>📍 Possession</li>
+
+            <li>📑 Reports</li>
+
+        </ul>
+
+    </div>
+
+
+    <!-- MAIN -->
+
+    <div class="main">
+
+        <div class="top">
+
+            <h1>Land Acquisition Projects</h1>
+
+            <a href="/projects/create/" class="btn">
+                + New Project
+            </a>
+
+        </div>
+
+
+        <div class="project-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Project</th>
+
+                        <th>Type</th>
+
+                        <th>State</th>
+
+                        <th>District</th>
+
+                        <th>Land Required</th>
+
+                        <th>Status</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for project in projects %}
+
+                    <tr>
+
+                        <td>
+                            <a href="{% url 'project_detail' project.id %}">
+                                {{ project.project_name }}
+                            </a>
+                        </td>
+
+                        <td>
+                            {{ project.project_type }}
+                        </td>
+
+                        <td>
+                            {{ project.state }}
+                        </td>
+
+                        <td>
+                            {{ project.district }}
+                        </td>
+
+                        <td>
+                            {{ project.land_required }} Acres
+                        </td>
+
+                        <td>
+
+                            <span class="status">
+
+                                {{ project.get_status_display }}
+
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="6">
+                            No projects found.
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
