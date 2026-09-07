@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ project.project_name }} | NLAMS Workflow</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #04111f;
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1200px;
+            margin: auto;
+            padding: 35px 0;
+        }
+
+        .back {
+            color: #7dd3fc;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .header {
+            margin-top: 25px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: 32px;
+        }
+
+        .header p {
+            color: #94a3b8;
+            margin: 0;
+        }
+
+        /* Current action */
+
+        .action-card {
+            background: linear-gradient(
+                135deg,
+                rgba(14, 165, 233, 0.18),
+                rgba(30, 41, 59, 0.7)
+            );
+
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 35px;
+        }
+
+        .action-label {
+            color: #7dd3fc;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+        }
+
+        .action-card h2 {
+            margin: 10px 0;
+            font-size: 26px;
+        }
+
+        .next-action {
+            color: #cbd5e1;
+            font-size: 15px;
+        }
+
+        /* Workflow */
+
+        .workflow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 45px 0;
+        }
+
+        .stage {
+            text-align: center;
+            position: relative;
+            flex: 1;
+        }
+
+        .circle {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            margin: auto;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #1e293b;
+            border: 2px solid #475569;
+
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .stage.completed .circle {
+            background: #166534;
+            border-color: #22c55e;
+        }
+
+        .stage.current .circle {
+            background: #0369a1;
+            border-color: #38bdf8;
+            box-shadow: 0 0 20px rgba(56,189,248,0.45);
+        }
+
+        .stage-title {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #cbd5e1;
+        }
+
+        .connector {
+            height: 3px;
+            flex: 0.5;
+            background: #334155;
+            margin-top: -30px;
+        }
+
+        /* Stats */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 35px;
+        }
+
+        .stat {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid #1e293b;
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            margin-top: 6px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        /* Project information */
+
+        .info {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid #1e293b;
+            border-radius: 16px;
+            padding: 25px;
+        }
+
+        .info h2 {
+            margin-top: 0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .info-item {
+            background: #0b1728;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .info-label {
+            color: #64748b;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #e2e8f0;
+            font-size: 15px;
+        }
+
+        @media(max-width: 900px) {
+
+            .workflow {
+                overflow-x: auto;
+                justify-content: flex-start;
+                min-width: 850px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media(max-width: 600px) {
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 25px;
+            }
+        }
+
+        .action-btn {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 11px 18px;
+    border-radius: 9px;
+
+    background: #0369a1;
+    color: white;
+
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+
+    border: 1px solid #38bdf8;
+
+    transition: 0.2s ease;
+}
+
+.action-btn:hover {
+    background: #0284c7;
+    transform: translateY(-2px);
+}
+
+.completed-message {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 11px 18px;
+    border-radius: 9px;
+
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+
+    border: 1px solid rgba(34, 197, 94, 0.4);
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.action-btn {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 11px 18px;
+    border-radius: 9px;
+
+    background: #0369a1;
+    color: white;
+
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+
+    border: 1px solid #38bdf8;
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.action-btn:hover {
+    background: #0284c7;
+    transform: translateY(-2px);
+}
+
+.workflow-steps {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 40px 0;
+}
+
+.workflow-step {
+    text-align: center;
+    min-width: 80px;
+}
+
+.step-circle {
+    width: 62px;
+    height: 62px;
+    margin: auto;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #1e293b;
+    border: 2px solid #475569;
+
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.workflow-step.current .step-circle {
+    background: #0369a1;
+    border-color: #38bdf8;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+}
+
+.workflow-step.completed .step-circle {
+    background: #166534;
+    border-color: #22c55e;
+}
+
+.step-label {
+    margin-top: 12px;
+    color: #cbd5e1;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.step-line {
+    height: 3px;
+    flex: 1;
+    background: #334155;
+    min-width: 25px;
+}
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="{% url 'projects' %}" class="back">
+        ← Back to Projects
+    </a>
+
+    <div class="header">
+
+        <h1>{{ project.project_name }}</h1>
+
+        <p>
+            Automated Land Acquisition Workflow
+        </p>
+
+    </div>
+
+
+    <!-- CURRENT ACTION -->
+
+    <div class="action-card">
+
+        <div class="action-label">
+            CURRENT WORKFLOW STAGE
+        </div>
+
+        <h2>
+            {{ current_stage }}
+        </h2>
+
+        <div class="next-action">
+    <strong>Next Action:</strong>
+    {{ next_action }}
+</div>
+
+
+{% if current_stage == 'LAND IDENTIFICATION' or current_stage == 'LAND VERIFICATION' %}
+
+<a href="{% url 'land_parcels' %}" class="action-btn">
+    🔍 Review Land Parcels
+</a>
+
+{% elif current_stage == 'NOTIFICATION' %}
+
+<form method="POST"
+      action="{% url 'workflow_action' project.id %}">
+    
+    {% csrf_token %}
+
+    <button type="submit" class="action-btn">
+        📢 Issue Notification
+    </button>
+
+</form>
+
+
+
+{% elif current_stage == 'COMPENSATION' %}
+
+<a href="{% url 'compensation_list' %}" class="action-btn">
+    💰 Review Compensation
+</a>
+
+{% elif current_stage == 'ACQUISITION' %}
+
+<form method="POST"
+      action="{% url 'workflow_action' project.id %}">
+    {% csrf_token %}
+
+    <button type="submit" class="action-btn">
+        ⚡ Complete Acquisition
+    </button>
+</form>
+
+{% elif current_stage == 'R&R' %}
+
+<form method="POST"
+      action="{% url 'complete_rr' project.id %}">
+
+    {% csrf_token %}
+
+    <button type="submit" class="action-btn">
+        🏠 Complete R&R
+    </button>
+
+</form>
+
+{% elif current_stage == 'POSSESSION' %}
+
+<form method="POST"
+      action="{% url 'complete_possession' project.id %}">
+
+    {% csrf_token %}
+
+    <button type="submit" class="action-btn">
+        📍 Take Possession
+    </button>
+
+</form>
+
+{% elif current_stage == 'COMPLETED' %}
+
+<div class="completed-message">
+    ✓ All workflow stages completed
+</div>
+
+{% endif %}
+
+
+    <!-- WORKFLOW -->
+
+    <div class="workflow-steps">
+
+    <!-- PROJECT -->
+    <div class="workflow-step
+        {% if current_stage == 'LAND IDENTIFICATION' %}
+            current
+        {% else %}
+            completed
+        {% endif %}">
+        <div class="step-circle">1</div>
+        <div class="step-label">PROJECT</div>
+    </div>
+
+    <div class="step-line"></div>
+
+    <!-- VERIFICATION -->
+    <div class="workflow-step
+        {% if current_stage == 'LAND VERIFICATION' %}
+            current
+        {% elif current_stage in 'NOTIFICATION,COMPENSATION,ACQUISITION,R&R,POSSESSION,COMPLETED' %}
+            completed
+        {% endif %}">
+        <div class="step-circle">2</div>
+        <div class="step-label">VERIFICATION</div>
+    </div>
+
+    <div class="step-line"></div>
+
+    <!-- NOTIFICATION -->
+    <div class="workflow-step
+        {% if current_stage == 'NOTIFICATION' %}
+            current
+        {% elif current_stage in 'COMPENSATION,ACQUISITION,R&R,POSSESSION,COMPLETED' %}
+            completed
+        {% endif %}">
+        <div class="step-circle">3</div>
+        <div class="step-label">NOTIFICATION</div>
+    </div>
+
+    <div class="step-line"></div>
+
+    <!-- COMPENSATION -->
+    <div class="workflow-step
+        {% if current_stage == 'COMPENSATION' %}
+            current
+        {% elif current_stage in 'ACQUISITION,R&R,POSSESSION,COMPLETED' %}
+            completed
+        {% endif %}">
+        <div class="step-circle">4</div>
+        <div class="step-label">COMPENSATION</div>
+    </div>
+
+    <div class="step-line"></div>
+
+    <!-- ACQUISITION -->
+    <div class="workflow-step
+        {% if current_stage == 'ACQUISITION' %}
+            current
+        {% elif current_stage in 'R&R,POSSESSION,COMPLETED' %}
+            completed
+        {% endif %}">
+        <div class="step-circle">5</div>
+        <div class="step-label">ACQUISITION</div>
+    </div>
+
+    <div class="step-line"></div>
+
+    <!-- R&R -->
+    <div class="workflow-step
+        {% if current_stage == 'R&R' %}
+            current
+        {% elif current_stage in 'POSSESSION,COMPLETED' %}
+            completed
+        {% endif %}">
+        <div class="step-circle">6</div>
+        <div class="step-label">R&R</div>
+    </div>
+
+    <div class="step-line"></div>
+
+    <!-- POSSESSION -->
+    <div class="workflow-step
+        {% if current_stage == 'POSSESSION' %}
+            current
+        {% elif current_stage == 'COMPLETED' %}
+            completed
+        {% endif %}">
+        <div class="step-circle">7</div>
+        <div class="step-label">POSSESSION</div>
+    </div>
+
+    <div class="step-line"></div>
+
+    <!-- COMPLETED -->
+    <div class="workflow-step
+        {% if current_stage == 'COMPLETED' %}
+            current
+        {% endif %}">
+        <div class="step-circle">✓</div>
+        <div class="step-label">COMPLETED</div>
+    </div>
+
+</div>
+
+
+    <!-- PARCEL STATISTICS -->
+
+    <div class="stats">
+
+        <div class="stat">
+            <div class="stat-value">
+                {{ total_parcels }}
+            </div>
+
+            <div class="stat-label">
+                Total Parcels
+            </div>
+        </div>
+
+
+        <div class="stat">
+            <div class="stat-value">
+                {{ verified_parcels }}
+            </div>
+
+            <div class="stat-label">
+                Verified
+            </div>
+        </div>
+
+
+        <div class="stat">
+            <div class="stat-value">
+                {{ notified_parcels }}
+            </div>
+
+            <div class="stat-label">
+                Notified
+            </div>
+        </div>
+
+
+        <div class="stat">
+            <div class="stat-value">
+                {{ acquired_parcels }}
+            </div>
+
+            <div class="stat-label">
+                Acquired
+            </div>
+        </div>
+
+
+        <div class="stat">
+            <div class="stat-value">
+                {{ possession_parcels }}
+            </div>
+
+            <div class="stat-label">
+                Possession
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- PROJECT INFORMATION -->
+
+    <div class="info">
+
+        <h2>
+            Project Information
+        </h2>
+
+        <div class="info-grid">
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    PROJECT TYPE
+                </div>
+
+                <div class="info-value">
+                    {{ project.project_type }}
+                </div>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    LOCATION
+                </div>
+
+                <div class="info-value">
+                    {{ project.district }}, {{ project.state }}
+                </div>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    LAND REQUIRED
+                </div>
+
+                <div class="info-value">
+                    {{ project.land_required }} Acres
+                </div>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    PROJECT STATUS
+                </div>
+
+                <div class="info-value">
+                    {{ project.get_status_display }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

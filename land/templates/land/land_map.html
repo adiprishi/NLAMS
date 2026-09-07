@@ -12,6 +12,7 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
+            background: #f4f7fb;
         }
 
         .header {
@@ -28,14 +29,32 @@
             padding: 20px;
         }
 
+        .info {
+            margin-bottom: 15px;
+        }
+
+        .info h3 {
+            margin-bottom: 5px;
+        }
+
         #map {
             height: 600px;
             width: 100%;
             border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
 
-        .info {
-            margin-bottom: 15px;
+        /* Popup styling */
+        .parcel-popup {
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -50,35 +69,55 @@
 
     <div class="info">
         <h3>Land Parcels</h3>
-        <p>Interactive visualization of acquired and proposed land parcels.</p>
+        <p>
+            Interactive GIS visualization of land parcels and
+            acquisition status.
+        </p>
     </div>
 
     <div id="map"></div>
 
     <div id="parcel-data" hidden>
+
         {% for parcel in parcels %}
+
             <div
-                class="parcel"
-                data-latitude="{{ parcel.latitude }}"
-                data-longitude="{{ parcel.longitude }}"
-                data-parcel-id="{{ parcel.parcel_id|escape }}"
-                data-owner="{{ parcel.owner_name|escape }}"
-                data-area="{{ parcel.area|escape }}"
-                data-status="{{ parcel.get_status_display|escape }}"
-            ></div>
+    class="parcel"
+    data-latitude="{{ parcel.latitude }}"
+    data-longitude="{{ parcel.longitude }}"
+    data-parcel-id="{{ parcel.parcel_id|escape }}"
+    data-owner="{{ parcel.owner_name|escape }}"
+    data-area="{{ parcel.area|escape }}"
+    data-status="{{ parcel.get_status_display|escape }}"
+    data-boundary="{{ parcel.boundary|escapejs }}"
+></div>
+
         {% endfor %}
+
     </div>
 
 </div>
 
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 
 <script>
 
-    // Center map around Assam
-    var map = L.map('map').setView([26.1445, 91.7362], 12);
+    // ==========================================
+    // INITIALIZE MAP
+    // ==========================================
 
-    // OpenStreetMap layer
+    var map = L.map('map').setView(
+        [26.1445, 91.7362],
+        12
+    );
+
+
+    // ==========================================
+    // OPEN STREET MAP
+    // ==========================================
+
     L.tileLayer(
         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         {
@@ -87,81 +126,247 @@
     ).addTo(map);
 
 
-    // Function to select marker color
-    function getMarkerColor(status) {
+    // ==========================================
+    // STATUS COLORS
+    // ==========================================
+
+    function getParcelColor(status) {
 
         if (status === 'Identified') {
-            return 'gold';
+            return '#f1c40f';
         }
 
         if (status === 'Verified') {
-            return 'blue';
+            return '#3498db';
         }
 
         if (status === 'Notified') {
-            return 'orange';
+            return '#f39c12';
         }
 
         if (status === 'Acquired') {
-            return 'green';
+            return '#27ae60';
         }
 
         if (status === 'Possession Taken') {
-            return 'purple';
+            return '#8e44ad';
         }
 
-        return 'blue';
+        return '#7f8c8d';
     }
 
 
-    // Add parcels from the data rendered by Django.
-    document.querySelectorAll('#parcel-data .parcel').forEach(function (parcel) {
-        var latitude = parseFloat(parcel.dataset.latitude);
-        var longitude = parseFloat(parcel.dataset.longitude);
-        var status = parcel.dataset.status;
-        var markerColor = getMarkerColor(status);
+    // ==========================================
+    // LOAD PARCELS
+    // ==========================================
 
-        var marker = L.circleMarker([latitude, longitude], {
-            radius: 10,
-            color: markerColor,
-            fillColor: markerColor,
-            fillOpacity: 0.8,
-            weight: 2
-        }).addTo(map);
+    var allParcels = [];
 
-        marker.bindPopup(
-            '<b>Parcel ID:</b> ' + parcel.dataset.parcelId + '<br>' +
-            '<b>Owner:</b> ' + parcel.dataset.owner + '<br>' +
-            '<b>Area:</b> ' + parcel.dataset.area + ' acres<br>' +
-            '<b>Status:</b> ' + status
+
+    document
+        .querySelectorAll('#parcel-data .parcel')
+        .forEach(function(parcel) {
+
+            var status =
+                parcel.dataset.status;
+
+            var color =
+                getParcelColor(status);
+
+
+            // Get actual boundary from Django
+            var polygonCoordinates =
+                JSON.parse(parcel.dataset.boundary);
+
+
+            // Create polygon
+            var polygon = L.polygon(
+    polygonCoordinates,
+    {
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.25,
+        weight: 3,
+        opacity: 1,
+        dashArray: '8, 6',
+    }
+).addTo(map);
+
+
+            // ======================================
+            // HOVER EFFECT
+            // ======================================
+
+            polygon.on('mouseover', function() {
+
+                polygon.setStyle({
+                    fillOpacity: 0.7,
+                    weight: 4
+                });
+
+            });
+
+
+            polygon.on('mouseout', function() {
+
+                polygon.setStyle({
+                    fillOpacity: 0.45,
+                    weight: 3
+                });
+
+            });
+
+
+            // ======================================
+            // POPUP
+            // ======================================
+
+            polygon.bindPopup(`
+
+                <div class="parcel-popup">
+
+                    <b>Parcel ID:</b>
+                    ${parcel.dataset.parcelId}
+
+                    <br>
+
+                    <b>Owner:</b>
+                    ${parcel.dataset.owner}
+
+                    <br>
+
+                    <b>Area:</b>
+                    ${parcel.dataset.area} acres
+
+                    <br>
+
+                    <b>Status:</b>
+
+                    <span
+                        class="status-badge"
+                        style="background:${color}; color:white; padding:4px 8px; border-radius:5px;"
+                    >
+                        ${status}
+                    </span>
+
+                </div>
+
+            `);
+
+
+            allParcels.push(polygon);
+
+        });
+
+
+    // ==========================================
+    // FIT MAP TO PARCELS
+    // ==========================================
+
+    if (allParcels.length > 0) {
+
+        var group =
+            L.featureGroup(allParcels);
+
+        map.fitBounds(
+            group.getBounds(),
+            {
+                padding: [30, 30]
+            }
         );
-    });
+
+    }
 
 
-    // Map legend
-    var legend = L.control({position: 'bottomright'});
+    // ==========================================
+    // LEGEND
+    // ==========================================
+
+    var legend =
+        L.control({
+            position: 'bottomright'
+        });
+
 
     legend.onAdd = function(map) {
 
-        var div = L.DomUtil.create('div', 'info legend');
+        var div =
+            L.DomUtil.create(
+                'div',
+                'info legend'
+            );
 
         div.style.background = 'white';
-        div.style.padding = '12px';
+        div.style.padding = '15px';
         div.style.borderRadius = '8px';
-        div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+        div.style.boxShadow =
+            '0 2px 10px rgba(0,0,0,0.25)';
 
         div.innerHTML = `
-            <b>Land Acquisition Status</b><br><br>
 
-            <span style="color:gold;">●</span> Identified<br>
-            <span style="color:blue;">●</span> Verified<br>
-            <span style="color:orange;">●</span> Notified<br>
-            <span style="color:green;">●</span> Acquired<br>
-            <span style="color:purple;">●</span> Possession Taken
+            <b>Land Acquisition Status</b>
+
+            <br><br>
+
+            <span style="
+                display:inline-block;
+                width:14px;
+                height:14px;
+                background:#f1c40f;
+                margin-right:6px;
+            "></span>
+            Identified
+
+            <br>
+
+            <span style="
+                display:inline-block;
+                width:14px;
+                height:14px;
+                background:#3498db;
+                margin-right:6px;
+            "></span>
+            Verified
+
+            <br>
+
+            <span style="
+                display:inline-block;
+                width:14px;
+                height:14px;
+                background:#f39c12;
+                margin-right:6px;
+            "></span>
+            Notified
+
+            <br>
+
+            <span style="
+                display:inline-block;
+                width:14px;
+                height:14px;
+                background:#27ae60;
+                margin-right:6px;
+            "></span>
+            Acquired
+
+            <br>
+
+            <span style="
+                display:inline-block;
+                width:14px;
+                height:14px;
+                background:#8e44ad;
+                margin-right:6px;
+            "></span>
+            Possession Taken
+
         `;
 
         return div;
+
     };
+
 
     legend.addTo(map);
 

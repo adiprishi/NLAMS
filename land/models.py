@@ -70,6 +70,8 @@ class LandParcel(models.Model):
         decimal_places=6
     )
 
+    boundary = models.JSONField(default=list, blank=True)
+
     status = models.CharField(
         max_length=30,
         choices=ACQUISITION_STATUS,

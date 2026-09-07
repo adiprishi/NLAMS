@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>NLAMS | Secure Login</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 20% 20%, #12365a 0%, transparent 35%),
+                radial-gradient(circle at 80% 80%, #063d3d 0%, transparent 35%),
+                #050b16;
+
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Background grid */
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+
+            background-image:
+                linear-gradient(rgba(0, 200, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 200, 255, 0.04) 1px, transparent 1px);
+
+            background-size: 45px 45px;
+            pointer-events: none;
+        }
+
+        .container {
+            width: 420px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+
+            margin: auto;
+            margin-bottom: 15px;
+
+            border: 1px solid #20d9ff;
+            border-radius: 16px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 28px;
+
+            color: #20d9ff;
+
+            box-shadow:
+                0 0 25px rgba(32, 217, 255, 0.3);
+        }
+
+        .brand h1 {
+            font-size: 28px;
+            letter-spacing: 3px;
+        }
+
+        .brand p {
+            color: #7f96ad;
+            font-size: 12px;
+            letter-spacing: 2px;
+            margin-top: 7px;
+        }
+
+        .login-card {
+            background: rgba(12, 25, 43, 0.88);
+
+            border: 1px solid rgba(60, 170, 220, 0.25);
+
+            border-radius: 20px;
+
+            padding: 35px;
+
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.45),
+                inset 0 1px rgba(255, 255, 255, 0.04);
+
+            backdrop-filter: blur(15px);
+        }
+
+        .login-title {
+            margin-bottom: 25px;
+        }
+
+        .login-title h2 {
+            font-size: 20px;
+        }
+
+        .login-title span {
+            color: #20d9ff;
+        }
+
+        .login-title p {
+            color: #71869d;
+            margin-top: 7px;
+            font-size: 13px;
+        }
+
+        label {
+            display: block;
+            color: #a9bdd0;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+
+            background: #081321;
+
+            border: 1px solid #20384f;
+
+            border-radius: 10px;
+
+            color: white;
+
+            outline: none;
+
+            margin-bottom: 18px;
+
+            transition: 0.2s;
+        }
+
+        input:focus {
+            border-color: #20d9ff;
+
+            box-shadow:
+                0 0 0 2px rgba(32, 217, 255, 0.08);
+        }
+
+        button {
+            width: 100%;
+
+            padding: 14px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: linear-gradient(
+                90deg,
+                #0db9e8,
+                #19e0bb
+            );
+
+            color: #031018;
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 8px 25px rgba(20, 220, 220, 0.25);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 18px;
+
+            text-align: center;
+
+            font-size: 12px;
+
+            min-height: 18px;
+        }
+
+        .security {
+            margin-top: 22px;
+
+            padding-top: 18px;
+
+            border-top: 1px solid #203040;
+
+            text-align: center;
+
+            color: #63798e;
+
+            font-size: 11px;
+        }
+
+        .dot {
+            display: inline-block;
+
+            width: 7px;
+            height: 7px;
+
+            background: #21e6a5;
+
+            border-radius: 50%;
+
+            margin-right: 6px;
+
+            box-shadow: 0 0 8px #21e6a5;
+        }
+
+        .footer {
+            text-align: center;
+
+            margin-top: 20px;
+
+            color: #506579;
+
+            font-size: 11px;
+        }
+
+        @media(max-width: 500px) {
+
+            .container {
+                width: 90%;
+            }
+
+            .login-card {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="brand">
+
+        <div class="logo">
+            ◈
+        </div>
+
+        <h1>NLAMS</h1>
+
+        <p>
+            NATIONAL LAND ACQUISITION & MANAGEMENT SYSTEM
+        </p>
+
+    </div>
+
+
+    <div class="login-card">
+
+        <div class="login-title">
+
+            <h2>
+                <span>01.</span> Secure Access
+            </h2>
+
+            <p>
+                Authorized personnel only
+            </p>
+
+        </div>
+
+
+        <form id="loginForm">
+
+            <label>Email Address</label>
+
+            <input
+                type="email"
+                id="email"
+                placeholder="admin@nlams.gov.in"
+                required
+            >
+
+
+            <label>Password</label>
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Enter your password"
+                required
+            >
+
+
+            <button
+                type="submit"
+                id="loginButton"
+            >
+                SECURE LOGIN
+            </button>
+
+        </form>
+
+
+        <div
+            class="status"
+            id="status"
+        ></div>
+
+
+        <div class="security">
+
+            <span class="dot"></span>
+
+            SUPABASE AUTHENTICATED SYSTEM
+
+        </div>
+
+    </div>
+
+
+    <div class="footer">
+
+        NLAMS • Smart India Hackathon 2026
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // Supabase configuration
+
+    const SUPABASE_URL = "{{ supabase_url }}";
+
+    const SUPABASE_KEY = "{{ supabase_publishable_key }}";
+
+
+    const supabaseClient =
+        supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+
+    const loginForm =
+        document.getElementById("loginForm");
+
+    const loginButton =
+        document.getElementById("loginButton");
+
+    const status =
+        document.getElementById("status");
+
+
+    loginForm.addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+            const email =
+                document.getElementById("email").value;
+
+            const password =
+                document.getElementById("password").value;
+
+
+            loginButton.disabled = true;
+
+            loginButton.innerText = "AUTHENTICATING...";
+
+            status.innerText = "";
+
+
+            const { data, error } =
+                await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+
+                if (error) {
+
+        status.style.color = "#ff6b6b";
+
+        status.innerText =
+            "Login failed. Check your email and password.";
+
+        loginButton.disabled = false;
+
+        loginButton.innerText = "SECURE LOGIN";
+
+        return;
+    }
+
+
+    /*
+        Supabase login successful.
+        Now send the access token to Django.
+    */
+
+    const accessToken = data.session.access_token;
+
+
+    const formData = new FormData();
+
+    formData.append(
+        "access_token",
+        accessToken
+    );
+
+
+    const djangoResponse = await fetch(
+        "{% url 'supabase_login' %}",
+        {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}"
+            }
+        }
+    );
+
+
+    const djangoData = await djangoResponse.json();
+
+
+    if (!djangoResponse.ok || !djangoData.success) {
+
+        status.style.color = "#ff6b6b";
+
+        status.innerText =
+            "Authentication bridge failed.";
+
+        loginButton.disabled = false;
+
+        loginButton.innerText = "SECURE LOGIN";
+
+        return;
+    }
+
+
+    status.style.color = "#21e6a5";
+
+    status.innerText =
+        "Authentication successful. Redirecting...";
+
+
+    window.location.href = "/";
+
+
+            status.style.color = "#21e6a5";
+
+            status.innerText =
+                "Authentication successful. Redirecting...";
+
+
+            window.location.href = "/";
+
+        }
+    );
+
+</script>
+
+</body>
+</html>

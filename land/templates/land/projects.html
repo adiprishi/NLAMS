@@ -2,134 +2,316 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Projects - NLAMS</title>
+    <title>Projects | NLAMS</title>
 
     <style>
 
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
         }
 
         body {
-            background: #f4f6f9;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #07111f;
+            color: #e5e7eb;
         }
 
-        .sidebar {
-            position: fixed;
-            width: 230px;
-            height: 100vh;
-            background: #1f2937;
-            color: white;
-            padding: 25px 15px;
+        /* MAIN CONTAINER */
+
+        .container {
+            max-width: 1250px;
+            margin: auto;
+            padding: 35px 25px;
         }
 
-        .logo {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 35px;
-        }
+        /* HEADER */
 
-        .menu {
-            list-style: none;
-        }
-
-        .menu li {
-            padding: 14px;
-            margin-bottom: 8px;
-            border-radius: 6px;
-        }
-
-        .menu li:hover {
-            background: #374151;
-        }
-
-        .menu a {
-            color: white;
-            text-decoration: none;
-        }
-
-        .main {
-            margin-left: 230px;
-            padding: 30px;
-        }
-
-        .top {
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
-        .top h1 {
-            color: #111827;
+        .title-section h1 {
+            margin: 0;
+            font-size: 30px;
+            color: #ffffff;
         }
 
-        .btn {
+        .title-section p {
+            margin-top: 8px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .new-project-btn {
             background: #2563eb;
             color: white;
             padding: 12px 18px;
-            border-radius: 6px;
+            border-radius: 8px;
             text-decoration: none;
+            font-weight: bold;
+            white-space: nowrap;
+            transition: 0.2s ease;
         }
 
-        .project-container {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        .new-project-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        /* SUMMARY */
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
+            background: #0d1b2a;
+            border: 1px solid #1e334b;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .summary-label {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        /* PROJECT TABLE */
+
+        .project-card {
+            background: #0d1b2a;
+            border: 1px solid #1e334b;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .project-card-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid #1e334b;
+        }
+
+        .project-card-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #ffffff;
+        }
+
+        .project-card-header p {
+            margin: 6px 0 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
+            min-width: 1000px;
         }
 
         th {
-            color: #374151;
+            background: #111f31;
+            color: #94a3b8;
+            padding: 15px;
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+
+        td {
+            padding: 17px 15px;
+            border-bottom: 1px solid #1a2b40;
+            font-size: 14px;
+            color: #dbe4ee;
+        }
+
+        tr:hover td {
+            background: #102235;
+        }
+
+        /* PROJECT NAME */
+
+        .project-name {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .project-name a.project-link {
+            color: #ffffff;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .project-name a.project-link:hover {
+            color: #60a5fa;
+        }
+
+        /* WORKFLOW BUTTON */
+
+        .workflow-btn {
+            display: inline-block;
+            width: fit-content;
+            padding: 7px 11px;
+            border-radius: 7px;
+            background: #0c4a6e;
+            color: #7dd3fc;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid #075985;
+            transition: 0.2s ease;
+        }
+
+        .workflow-btn:hover {
+            background: #0369a1;
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        /* STATUS */
 
         .status {
-            background: #dbeafe;
-            color: #1d4ed8;
-            padding: 6px 12px;
-            border-radius: 15px;
+            display: inline-block;
+            padding: 6px 11px;
+            border-radius: 20px;
             font-size: 12px;
+            font-weight: bold;
         }
 
-        @media (max-width: 700px) {
+        .completed {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.25);
+        }
 
-            .sidebar {
-                position: relative;
-                width: 100%;
-                height: auto;
+        .acquisition {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.25);
+        }
+
+        .review {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.25);
+        }
+
+        .submitted {
+            background: rgba(148, 163, 184, 0.15);
+            color: #cbd5e1;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+        }
+
+        .approved {
+            background: rgba(139, 92, 246, 0.15);
+            color: #a78bfa;
+            border: 1px solid rgba(139, 92, 246, 0.25);
+        }
+
+        /* EMPTY */
+
+        .empty {
+            text-align: center;
+            padding: 50px !important;
+            color: #64748b;
+        }
+
+        /* BACK */
+
+        .back {
+            display: inline-block;
+            margin-top: 22px;
+            color: #60a5fa;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back:hover {
+            color: #93c5fd;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 800px) {
+
+            .container {
+                padding: 25px 15px;
             }
 
-            .main {
-                margin-left: 0;
-            }
-
-            .top {
+            .header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 15px;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            .title-section h1 {
+                font-size: 25px;
             }
 
         }
+
+        .top-nav {
+    width: 100%;
+    background: #0d1b2a;
+    border-bottom: 1px solid #1e334b;
+    padding: 14px 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.nav-logo {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 20px;
+}
+
+.top-nav a {
+    color: #94a3b8;
+    text-decoration: none;
+    padding: 9px 13px;
+    border-radius: 7px;
+    font-size: 13px;
+    transition: 0.2s;
+}
+
+.top-nav a:hover {
+    background: #102235;
+    color: #ffffff;
+}
+
+.top-nav a.active {
+    background: #0c4a6e;
+    color: #7dd3fc;
+}
 
     </style>
 
@@ -137,56 +319,133 @@
 
 
 <body>
+    <nav class="top-nav">
 
-    <!-- SIDEBAR -->
+    <div class="nav-logo">
+        🏛️ NLAMS
+    </div>
 
-    <div class="sidebar">
+    <a href="{% url 'home' %}">📊 Dashboard</a>
 
-        <div class="logo">
-            🏛️ NLAMS
+    <a href="{% url 'projects' %}" class="active">
+        📁 Projects
+    </a>
+
+    <a href="{% url 'land_map' %}">
+        🗺️ Land Parcels
+    </a>
+
+    <a href="{% url 'compensation_list' %}">
+        💰 Compensation
+    </a>
+
+    <a href="{% url 'rr_list' %}">
+        🏠 R&R
+    </a>
+
+    <a href="{% url 'possession_list' %}">
+        📍 Possession
+    </a>
+
+    <a href="{% url 'reports' %}">
+    📑 Reports
+</a>
+</nav>
+
+<div class="container">
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <div class="title-section">
+
+            <h1>📁 Land Acquisition Projects</h1>
+
+            <p>
+                Monitor project progress, acquisition status and workflow activities.
+            </p>
+
         </div>
 
-        <ul class="menu">
-
-            <li>
-                <a href="/">📊 Dashboard</a>
-            </li>
-
-            <li>
-                <a href="/projects/">📁 Projects</a>
-            </li>
-
-            <li>🗺️ Land Parcels</li>
-
-            <li>💰 Compensation</li>
-
-            <li>🏠 R&R</li>
-
-            <li>📍 Possession</li>
-
-            <li>📑 Reports</li>
-
-        </ul>
+        <a href="{% url 'create_project' %}" class="new-project-btn">
+            + New Project
+        </a>
 
     </div>
 
 
-    <!-- MAIN -->
+    <!-- SUMMARY -->
 
-    <div class="main">
+    <div class="summary">
 
-        <div class="top">
+        <div class="summary-card">
 
-            <h1>Land Acquisition Projects</h1>
+            <div class="summary-label">
+                TOTAL PROJECTS
+            </div>
 
-            <a href="/projects/create/" class="btn">
-                + New Project
-            </a>
+            <div class="summary-value">
+                {{ projects|length }}
+            </div>
 
         </div>
 
 
-        <div class="project-container">
+        <div class="summary-card">
+
+            <div class="summary-label">
+                ACTIVE PROJECTS
+            </div>
+
+            <div class="summary-value">
+
+                {% with active=0 %}
+                    {% for project in projects %}
+                        {% if project.status != 'COMPLETED' %}
+                            {% with active=active|add:"1" %}{% endwith %}
+                        {% endif %}
+                    {% endfor %}
+                {% endwith %}
+
+                {{ active_projects|default:"0" }}
+
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                COMPLETED PROJECTS
+            </div>
+
+            <div class="summary-value">
+                {{ completed_projects|default:"0" }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- PROJECT TABLE -->
+
+    <div class="project-card">
+
+        <div class="project-card-header">
+
+            <h2>Project Registry</h2>
+
+            <p>
+                Centralized list of land acquisition projects and their current workflow stage.
+            </p>
+
+        </div>
+
+
+        <div class="table-wrapper">
 
             <table>
 
@@ -195,15 +454,10 @@
                     <tr>
 
                         <th>Project</th>
-
                         <th>Type</th>
-
                         <th>State</th>
-
                         <th>District</th>
-
                         <th>Land Required</th>
-
                         <th>Status</th>
 
                     </tr>
@@ -213,55 +467,103 @@
 
                 <tbody>
 
-                    {% for project in projects %}
+                {% for project in projects %}
 
                     <tr>
 
                         <td>
-                            <a href="{% url 'project_detail' project.id %}">
-                                {{ project.project_name }}
-                            </a>
+
+                            <div class="project-name">
+
+                                <a
+                                    href="{% url 'project_detail' project.id %}"
+                                    class="project-link"
+                                >
+                                    {{ project.project_name }}
+                                </a>
+
+                                <a
+                                    href="{% url 'project_workflow' project.id %}"
+                                    class="workflow-btn"
+                                >
+                                    ⚡ View Workflow
+                                </a>
+
+                            </div>
+
                         </td>
+
 
                         <td>
                             {{ project.project_type }}
                         </td>
 
+
                         <td>
                             {{ project.state }}
                         </td>
+
 
                         <td>
                             {{ project.district }}
                         </td>
 
+
                         <td>
                             {{ project.land_required }} Acres
                         </td>
 
+
                         <td>
 
-                            <span class="status">
+                            {% if project.status == 'COMPLETED' %}
 
-                                {{ project.get_status_display }}
+                                <span class="status completed">
+                                    Completed
+                                </span>
 
-                            </span>
+                            {% elif project.status == 'ACQUISITION' %}
+
+                                <span class="status acquisition">
+                                    Acquisition
+                                </span>
+
+                            {% elif project.status == 'UNDER_REVIEW' %}
+
+                                <span class="status review">
+                                    Under Review
+                                </span>
+
+                            {% elif project.status == 'APPROVED' %}
+
+                                <span class="status approved">
+                                    Approved
+                                </span>
+
+                            {% else %}
+
+                                <span class="status submitted">
+                                    {{ project.get_status_display }}
+                                </span>
+
+                            {% endif %}
 
                         </td>
 
                     </tr>
 
-                    {% empty %}
+
+                {% empty %}
 
                     <tr>
 
-                        <td colspan="6">
+                        <td colspan="6" class="empty">
                             No projects found.
                         </td>
 
                     </tr>
 
-                    {% endfor %}
+                {% endfor %}
 
                 </tbody>
 
@@ -270,6 +572,13 @@
         </div>
 
     </div>
+
+
+    <a href="{% url 'home' %}" class="back">
+        ← Back to Dashboard
+    </a>
+
+</div>
 
 </body>
 
