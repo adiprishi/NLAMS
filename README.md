@@ -857,7 +857,7 @@ management.
 
 ## 👥 Team
 
-**Team BhoomiSetu**
+**Team TerraSync**
 
 **Project:** NLAMS --- National Land Acquisition & Management System
 
