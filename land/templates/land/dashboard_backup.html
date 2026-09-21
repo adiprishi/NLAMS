@@ -18,79 +18,62 @@
 
     <style>
         :root {
-    --bg: #f5f7f9;
-    --panel: #ffffff;
-    --panel-2: #f8fafc;
-
-    --line: #dfe5ea;
-
-    --text: #172033;
-    --muted: #64748b;
-
-    --primary: #0b4f71;
-    --primary-dark: #083b55;
-    --primary-light: #eaf3f7;
-
-    --blue: #176b9a;
-    --cyan: #176b9a;
-    --green: #287a55;
-    --amber: #a56a12;
-    --red: #b44343;
-
-    --shadow:
-        0 2px 10px rgba(15, 35, 50, 0.06);
-}
+            --bg: #03101b;
+            --panel: #071a28;
+            --panel-2: #0a2030;
+            --line: rgba(86, 190, 232, .16);
+            --text: #e9f7ff;
+            --muted: #82a3b5;
+            --cyan: #20c7f5;
+            --cyan-2: #0d8fd0;
+            --green: #18e99b;
+            --amber: #f5a62f;
+            --red: #ff6878;
+            --purple: #9c7cff;
+            --shadow: 0 18px 50px rgba(0,0,0,.25);
+        }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         html { scroll-behavior: smooth; }
 
         body {
-    min-width: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: Inter, Arial, sans-serif;
-    line-height: 1.5;
-}
+            min-width: 0;
+            background:
+                radial-gradient(circle at 75% 0%, rgba(24, 148, 210, .10), transparent 30%),
+                var(--bg);
+            color: var(--text);
+            font-family: Inter, Arial, sans-serif;
+            line-height: 1.45;
+        }
 
         a { color: inherit; text-decoration: none; }
 
         button, select, input { font: inherit; }
 
         .app {
-    min-height: 100vh;
-    display: block;
-}
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 238px minmax(0, 1fr);
+        }
 
         /* SIDEBAR */
         .sidebar {
-    position: relative;
-    top: 0;
-    z-index: 1000;
-
-    width: 100%;
-    height: auto;
-    min-height: 0;
-
-    display: flex;
-    align-items: center;
-
-    background: #ffffff;
-    border-right: none;
-    border-bottom: 1px solid #dfe5ea;
-
-    padding: 14px 28px;
-
-    box-shadow: 0 2px 8px rgba(15, 35, 50, 0.05);
-}
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            padding: 22px 14px;
+            border-right: 1px solid var(--line);
+            background: rgba(3, 15, 25, .94);
+            z-index: 1000;
+        }
 
         .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    flex-shrink: 0;
-}
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 5px 10px 24px;
+        }
 
         .brand-mark {
     width: 39px;
@@ -133,38 +116,33 @@
         }
 
         .nav {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-left: 45px;
-}
+            display: grid;
+            gap: 4px;
+        }
+
         .nav a {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    padding: 10px 14px;
-
-    color: #46576a;
-    text-decoration: none;
-
-    font-size: 13px;
-    font-weight: 600;
-
-    border-radius: 4px;
-    transition: all .2s ease;
-}
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            min-height: 42px;
+            padding: 9px 12px;
+            border-radius: 10px;
+            color: #9bb7c5;
+            font-size: 12px;
+            font-weight: 600;
+            transition: .2s ease;
+        }
 
         .nav a:hover {
-    color: var(--primary);
-    background: #f1f6f9;
-}
+            color: var(--text);
+            background: rgba(32,199,245,.07);
+        }
 
         .nav a.active {
-    color: #0b4f71;
-    background: #eaf3f7;
-    box-shadow: none;
-}
+            color: #fff;
+            background: linear-gradient(90deg, rgba(32,199,245,.17), rgba(32,199,245,.04));
+            box-shadow: inset 2px 0 0 var(--cyan);
+        }
 
         .nav-icon {
             width: 22px;
@@ -173,12 +151,13 @@
         }
 
         .sidebar-bottom {
-    position: static;
-    margin-left: auto;
-
-    display: flex;
-    align-items: center;
-}
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 18px;
+            border-top: 1px solid var(--line);
+            padding-top: 14px;
+        }
 
         .sidebar-bottom a {
             display: block;
@@ -189,9 +168,8 @@
 
         /* MAIN */
         .main {
-    min-width: 0;
-    width: 100%;
-}
+            min-width: 0;
+        }
 
         .topbar {
             height: 68px;
@@ -201,7 +179,8 @@
             gap: 18px;
             padding: 0 28px;
             border-bottom: 1px solid var(--line);
-            background: #ffffff;
+            background: rgba(3, 15, 25, .72);
+            backdrop-filter: blur(14px);
             position: sticky;
             top: 0;
             z-index: 900;
@@ -229,8 +208,8 @@
             padding: 0 13px;
             border: 1px solid var(--line);
             border-radius: 10px;
-            color: #64748b;
-            background: #f7f9fa;
+            color: #6f91a3;
+            background: rgba(9, 31, 44, .68);
             font-size: 11px;
         }
 
@@ -318,7 +297,7 @@
             position: absolute;
             inset: 0;
             background:
-                linear-gradient(90deg, rgba(5,38,58,.88) 0%, rgba(5,38,58,.55) 45%, rgba(5,38,58,.08) 100%),
+                linear-gradient(90deg, rgba(3,16,27,.98) 0%, rgba(3,16,27,.78) 42%, rgba(3,16,27,.12) 100%),
                 url("{% static 'land/images/nlams_taj_hero.png' %}") center/cover no-repeat;
         }
 
@@ -330,7 +309,7 @@
         }
 
         .greeting {
-            color: #8ed8f2;
+            color: var(--cyan);
             font-size: 11px;
             font-weight: 700;
             letter-spacing: .08em;
@@ -339,16 +318,15 @@
         }
 
         .welcome {
-    color: #ffffff;
-    font-size: clamp(24px, 3vw, 36px);
-    line-height: 1.12;
-    font-weight: 800;
-    letter-spacing: -.03em;
-}
+            font-size: clamp(22px, 3vw, 34px);
+            line-height: 1.12;
+            font-weight: 800;
+            letter-spacing: -.03em;
+        }
 
         .keywords {
             margin-top: 14px;
-    color: #e1f1f6;
+            color: #9fc0cf;
             font-size: 10px;
             word-spacing: 5px;
         }
@@ -422,19 +400,13 @@
         }
 
         .kpi {
-    min-width: 0;
-    padding: 18px;
-    border: 1px solid #dfe5ea;
-    border-radius: 8px;
-    background: #ffffff;
-    box-shadow: 0 2px 8px rgba(15, 35, 50, 0.05);
-    transition: .2s ease;
-}
-
-.kpi:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(15, 35, 50, 0.08);
-}
+            min-width: 0;
+            padding: 17px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: linear-gradient(145deg, rgba(10,32,48,.96), rgba(5,23,35,.96));
+            box-shadow: var(--shadow);
+        }
 
         .kpi-top {
             display: flex;
@@ -462,22 +434,21 @@
         }
 
         .kpi-value {
-    margin-top: 3px;
-    color: #0b4f71;
-    font-size: clamp(20px, 2.2vw, 27px);
-    font-weight: 800;
-    letter-spacing: -.04em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+            margin-top: 3px;
+            font-size: clamp(20px, 2.2vw, 27px);
+            font-weight: 800;
+            letter-spacing: -.04em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         .kpi-change {
-    margin-top: 5px;
-    color: #287a55;
-    font-size: 9px;
-    font-weight: 700;
-}
+            margin-top: 5px;
+            color: var(--green);
+            font-size: 9px;
+            font-weight: 700;
+        }
 
         .kpi-period {
             color: #587889;
@@ -494,28 +465,29 @@
         }
 
         .card {
-    min-width: 0;
-    border: 1px solid #dfe5ea;
-    border-radius: 8px;
-    background: #ffffff;
-    box-shadow: 0 2px 8px rgba(15, 35, 50, 0.05);
-    overflow: hidden;
-}
+            min-width: 0;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: linear-gradient(145deg, rgba(8,28,43,.98), rgba(4,19,30,.98));
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
 
         .card-title {
-    padding: 15px 17px;
-    border-bottom: 1px solid #e5e9ed;
-    color: #173b52;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: .02em;
-}
+            padding: 15px 17px;
+            border-bottom: 1px solid var(--line);
+            color: #d8eef8;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .02em;
+        }
 
         .card-title small {
-    color: #64748b;
-    font-size: 8px;
-    font-weight: 500;
-}
+            color: var(--muted);
+            font-size: 8px;
+            font-weight: 500;
+        }
+
         /* ACQUISITION */
         .acquisition-content {
             min-height: 210px;
@@ -548,9 +520,7 @@
             position: absolute;
             inset: 13px;
             border-radius: 50%;
-            .donut::after {
-    background: #ffffff;
-}
+            background: #061925;
         }
 
         .donut-text {
@@ -558,7 +528,6 @@
             z-index: 1;
             font-size: 27px;
             font-weight: 800;
-            color: #172033;
         }
 
         .legend {
@@ -616,7 +585,7 @@
             left: 55%;
             width: 90%;
             height: 1px;
-            background: #cbd8df;
+            background: #285366;
         }
 
         .step.done:not(:last-child)::after { background: var(--green); }
@@ -631,11 +600,10 @@
             place-items: center;
             border: 1px solid #315669;
             border-radius: 50%;
-            background: #ffffff;
-            color: #64748b;
+            background: #071c2a;
+            color: #6d8b99;
             font-size: 9px;
             font-weight: 800;
-            border-color: #b9cbd5;
         }
 
         .step.done .step-dot {
@@ -853,25 +821,14 @@
             .app { display: block; }
 
             .sidebar {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-
-    width: 100%;
-    height: auto;
-    min-height: 72px;
-
-    display: flex;
-    align-items: center;
-
-    background: #ffffff;
-    border-right: none;
-    border-bottom: 1px solid #dfe5ea;
-
-    padding: 0 32px;
-
-    box-shadow: 0 2px 8px rgba(15, 35, 50, 0.05);
-}
+                position: fixed;
+                top: 0;
+                left: -280px;
+                width: 260px;
+                height: 100vh;
+                transition: left .25s ease;
+                box-shadow: 20px 0 60px rgba(0,0,0,.35);
+            }
 
             .sidebar.open { left: 0; }
 
@@ -1134,297 +1091,6 @@
     opacity: 0.6;
     cursor: wait;
 }
-
-/* GOVERNMENT SERVICES */
-
-.services-section {
-    margin: 26px 0 22px;
-}
-
-.services-header {
-    margin-bottom: 14px;
-}
-
-.services-header h2 {
-    color: #173b52;
-    font-size: 21px;
-    font-weight: 800;
-    margin: 0;
-}
-
-.services-header p {
-    color: #64748b;
-    font-size: 10px;
-    margin-top: 4px;
-}
-
-.services-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-}
-
-.service-tile {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-
-    min-height: 105px;
-    padding: 18px;
-
-    background: #ffffff;
-    border: 1px solid #dfe5ea;
-    border-radius: 8px;
-
-    box-shadow: 0 2px 8px rgba(15, 35, 50, 0.04);
-
-    transition:
-        transform .2s ease,
-        box-shadow .2s ease,
-        border-color .2s ease;
-}
-
-.service-tile:hover {
-    transform: translateY(-3px);
-    border-color: #9fc8da;
-    box-shadow: 0 8px 20px rgba(15, 35, 50, 0.08);
-}
-
-.service-icon {
-    width: 48px;
-    height: 48px;
-
-    flex: 0 0 48px;
-
-    display: grid;
-    place-items: center;
-
-    border-radius: 8px;
-
-    background: #eaf3f7;
-    color: #0b4f71;
-
-    font-size: 21px;
-}
-
-.service-content {
-    min-width: 0;
-}
-
-.service-content h3 {
-    color: #173b52;
-    font-size: 13px;
-    font-weight: 800;
-    margin: 0 0 4px;
-}
-
-.service-content p {
-    color: #64748b;
-    font-size: 9px;
-    line-height: 1.5;
-    margin: 0;
-}
-
-.service-arrow {
-    margin-left: auto;
-    color: #176b9a;
-    font-size: 18px;
-    flex-shrink: 0;
-}
-
-@media (max-width: 900px) {
-    .services-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 600px) {
-    .services-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* GIS FEATURE */
-
-.gis-feature {
-    display: grid;
-    grid-template-columns: 1.25fr .75fr;
-    gap: 18px;
-    margin: 24px 0;
-}
-
-.gis-feature-main {
-    position: relative;
-    min-height: 230px;
-    overflow: hidden;
-    border-radius: 8px;
-    background:
-        linear-gradient(90deg, rgba(5,38,58,.94), rgba(5,38,58,.55)),
-        url("{% static 'land/images/nlams_taj_hero.png' %}") center/cover;
-    box-shadow: 0 3px 12px rgba(15,35,50,.08);
-}
-
-.gis-feature-content {
-    position: relative;
-    z-index: 2;
-    padding: 28px;
-    max-width: 600px;
-}
-
-.gis-feature-label {
-    color: #8ed8f2;
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-}
-
-.gis-feature h2 {
-    color: #ffffff;
-    font-size: 25px;
-    line-height: 1.15;
-    margin-bottom: 9px;
-}
-
-.gis-feature p {
-    color: #d5e7ee;
-    font-size: 10px;
-    line-height: 1.6;
-    max-width: 500px;
-}
-
-.gis-feature-actions {
-    display: flex;
-    gap: 9px;
-    margin-top: 20px;
-}
-
-.gis-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 10px 15px;
-    border-radius: 5px;
-    font-size: 9px;
-    font-weight: 800;
-}
-
-.gis-btn.primary {
-    background: #ffffff;
-    color: #0b4f71;
-}
-
-.gis-btn.secondary {
-    border: 1px solid rgba(255,255,255,.35);
-    color: #ffffff;
-    background: rgba(255,255,255,.08);
-}
-
-.gis-feature-info {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.gis-info-card {
-    padding: 18px;
-    background: #ffffff;
-    border: 1px solid #dfe5ea;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(15,35,50,.04);
-}
-
-.gis-info-icon {
-    width: 36px;
-    height: 36px;
-    display: grid;
-    place-items: center;
-    border-radius: 7px;
-    background: #eaf3f7;
-    color: #0b4f71;
-    font-size: 16px;
-    margin-bottom: 12px;
-}
-
-.gis-info-card strong {
-    display: block;
-    color: #173b52;
-    font-size: 11px;
-}
-
-.gis-info-card span {
-    display: block;
-    margin-top: 4px;
-    color: #64748b;
-    font-size: 8px;
-    line-height: 1.5;
-}
-
-@media (max-width: 850px) {
-    .gis-feature {
-        grid-template-columns: 1fr;
-    }
-}
-#gis-preview-map {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-}
-
-.gis-map-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background:
-        linear-gradient(
-            90deg,
-            rgba(5,38,58,.92) 0%,
-            rgba(5,38,58,.62) 45%,
-            rgba(5,38,58,.15) 100%
-        );
-    pointer-events: none;
-}
-
-.gis-feature-main .leaflet-control-container {
-    z-index: 5;
-}
-
-.gis-feature-main .leaflet-control-zoom a {
-    background: #ffffff !important;
-    color: #173b52 !important;
-    border-color: #dfe5ea !important;
-}
-
-/* SECTION HEADINGS */
-
-.section-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin: 28px 0 13px;
-}
-
-.section-label {
-    color: #176b9a;
-    font-size: 8px;
-    font-weight: 800;
-    letter-spacing: .14em;
-    margin-bottom: 4px;
-}
-
-.section-heading h2 {
-    color: #173b52;
-    font-size: 21px;
-    font-weight: 800;
-    margin: 0;
-}
-
-.section-heading p {
-    color: #64748b;
-    font-size: 9px;
-    margin-top: 4px;
-}
     </style>
 </head>
 
@@ -1541,8 +1207,8 @@
             <div class="dashboard-heading">
     <div>
         <div class="page-eyebrow">NLAMS DASHBOARD</div>
-        <h1>How can we help you?</h1>
-        <p>Access land acquisition services, information and tools.</p>
+        <h1>Command Overview</h1>
+        <p>Monitor land acquisition, compensation, R&amp;R and possession.</p>
     </div>
 
     <div class="dashboard-actions">
@@ -1595,176 +1261,6 @@
             </section>
 
             <!-- KPIs -->
-             <section class="services-section">
-
-    <div class="services-header">
-        <h2>How can we help you?</h2>
-        <p>Access NLAMS services, information and land management tools.</p>
-    </div>
-
-    <div class="services-grid">
-
-        <a href="{% url 'projects' %}" class="service-tile">
-            <div class="service-icon">▣</div>
-
-            <div class="service-content">
-                <h3>Projects</h3>
-                <p>Submit, manage and monitor land acquisition projects.</p>
-            </div>
-
-            <div class="service-arrow">›</div>
-        </a>
-
-
-        <a href="{% url 'land_intelligence' %}" class="service-tile">
-            <div class="service-icon">⌖</div>
-
-            <div class="service-content">
-                <h3>GIS & Land Intelligence</h3>
-                <p>Explore parcels, boundaries and spatial land information.</p>
-            </div>
-
-            <div class="service-arrow">›</div>
-        </a>
-
-
-        <a href="{% url 'compensation_list' %}" class="service-tile">
-            <div class="service-icon">₹</div>
-
-            <div class="service-content">
-                <h3>Compensation</h3>
-                <p>Track assessed, paid and pending compensation.</p>
-            </div>
-
-            <div class="service-arrow">›</div>
-        </a>
-
-
-        <a href="{% url 'rr_list' %}" class="service-tile">
-            <div class="service-icon">♙</div>
-
-            <div class="service-content">
-                <h3>Rehabilitation & R&R</h3>
-                <p>Monitor rehabilitation and resettlement cases.</p>
-            </div>
-
-            <div class="service-arrow">›</div>
-        </a>
-
-
-        <a href="{% url 'possession_list' %}" class="service-tile">
-            <div class="service-icon">⌂</div>
-
-            <div class="service-content">
-                <h3>Possession</h3>
-                <p>Track possession status across acquired parcels.</p>
-            </div>
-
-            <div class="service-arrow">›</div>
-        </a>
-
-
-        <a href="{% url 'reports' %}" class="service-tile">
-            <div class="service-icon">▤</div>
-
-            <div class="service-content">
-                <h3>Reports & MIS</h3>
-                <p>View management information and project reports.</p>
-            </div>
-
-            <div class="service-arrow">›</div>
-        </a>
-
-    </div>
-
-</section>
-<section class="gis-feature">
-
-    <div class="gis-feature-main">
-
-    <div id="gis-preview-map"></div>
-
-    <div class="gis-map-overlay"></div>
-
-    <div class="gis-feature-content">
-
-        <div class="gis-feature-label">
-            Spatial Land Intelligence
-        </div>
-
-        <h2>
-            Explore land with GIS intelligence
-        </h2>
-
-        <p>
-            View land parcels, boundaries, ownership information
-            and acquisition status through an interactive
-            geospatial interface.
-        </p>
-
-        <div class="gis-feature-actions">
-
-            <a href="{% url 'land_intelligence' %}"
-               class="gis-btn primary">
-                ◈ Open Land Intelligence →
-            </a>
-
-            <a href="{% url 'land_map' %}"
-               class="gis-btn secondary">
-                View GIS Map
-            </a>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-    <div class="gis-feature-info">
-
-        <div class="gis-info-card">
-            <div class="gis-info-icon">⌖</div>
-            <strong>Parcel Mapping</strong>
-            <span>
-                Locate and visualize individual land parcels.
-            </span>
-        </div>
-
-        <div class="gis-info-card">
-            <div class="gis-info-icon">◇</div>
-            <strong>Spatial Analysis</strong>
-            <span>
-                Draw an area and identify intersecting parcels.
-            </span>
-        </div>
-
-        <div class="gis-info-card">
-            <div class="gis-info-icon">▣</div>
-            <strong>Satellite View</strong>
-            <span>
-                Inspect acquisition areas using satellite imagery.
-            </span>
-        </div>
-
-        <div class="gis-info-card">
-            <div class="gis-info-icon">₹</div>
-            <strong>Land Intelligence</strong>
-            <span>
-                Connect parcel information with acquisition data.
-            </span>
-        </div>
-
-    </div>
-
-</section>
-<div class="section-heading">
-    <div>
-        <div class="section-label">NLAMS OVERVIEW</div>
-        <h2>Land acquisition at a glance</h2>
-        <p>Key indicators from the current NLAMS portfolio.</p>
-    </div>
-</div>
             <section class="kpi-grid kpi-grid-five">
 
                 <div class="kpi">
@@ -2184,38 +1680,6 @@ document.getElementById("languageSelector").addEventListener(
         changeLanguage(this.value);
     }
 );
-const gisPreview = L.map('gis-preview-map', {
-    zoomControl: true,
-    attributionControl: true
-}).setView([26.1445, 91.7362], 12);
-
-const gisStreet = L.tileLayer(
-    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-    {
-        attribution: 'Tiles © Esri'
-    }
-);
-
-const gisSatellite = L.tileLayer(
-    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    {
-        attribution: 'Tiles © Esri'
-    }
-);
-
-gisStreet.addTo(gisPreview);
-
-L.control.layers({
-    'Map': gisStreet,
-    'Satellite': gisSatellite
-}, null, {
-    position: 'topright'
-}).addTo(gisPreview);
-
-L.marker([26.1445, 91.7362])
-    .addTo(gisPreview)
-    .bindPopup('<strong>NLAMS GIS Region</strong><br>Kamrup, Assam')
-    .openPopup();
 </script>
 
 </body>

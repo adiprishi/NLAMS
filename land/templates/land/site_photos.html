@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Site Photos | NLAMS</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #07111f;
+            color: #e5e7eb;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 35px 25px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: white;
+            font-size: 30px;
+        }
+
+        .header p {
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        .upload-card {
+            background: #0d1b2a;
+            border: 1px solid #1e334b;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .upload-card h2 {
+            margin-top: 0;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 11px;
+            border-radius: 7px;
+            border: 1px solid #334155;
+            background: #111f31;
+            color: white;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .upload-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .upload-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .gallery-title {
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .photo-card {
+            background: #0d1b2a;
+            border: 1px solid #1e334b;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-info {
+            padding: 15px;
+        }
+
+        .photo-info h3 {
+            margin: 0 0 8px;
+            font-size: 15px;
+            color: white;
+        }
+
+        .photo-info p {
+            margin: 5px 0;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .category {
+            display: inline-block;
+            margin-top: 5px;
+            padding: 5px 9px;
+            border-radius: 6px;
+            background: #0c4a6e;
+            color: #7dd3fc;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .empty {
+            background: #0d1b2a;
+            border: 1px solid #1e334b;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        @media (max-width: 800px) {
+
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+
+        <h1>📸 Site Photos</h1>
+
+        <p>
+            {{ project.project_name }}
+        </p>
+
+    </div>
+
+
+    <!-- UPLOAD -->
+
+    <div class="upload-card">
+
+        <h2>Upload Site Photo</h2>
+
+        <form
+            method="POST"
+            enctype="multipart/form-data"
+        >
+
+            {% csrf_token %}
+
+
+            <div class="form-group">
+
+                <label>Photo</label>
+
+                <input
+                    type="file"
+                    name="photo"
+                    accept="image/*"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Category</label>
+
+                <select name="category">
+
+                    <option value="SITE">
+                        Site Condition
+                    </option>
+
+                    <option value="BEFORE">
+                        Before Acquisition
+                    </option>
+
+                    <option value="DURING">
+                        During Acquisition
+                    </option>
+
+                    <option value="AFTER">
+                        After Possession
+                    </option>
+
+                    <option value="OTHER">
+                        Other
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Parcel (Optional)</label>
+
+                <select name="parcel">
+
+                    <option value="">
+                        Project Level Photo
+                    </option>
+
+                    {% for parcel in parcels %}
+
+                        <option value="{{ parcel.id }}">
+                            {{ parcel.parcel_id }} —
+                            {{ parcel.owner_name }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Caption</label>
+
+                <textarea
+                    name="caption"
+                    placeholder="Describe what this photo shows..."
+                ></textarea>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="upload-btn"
+            >
+                📤 Upload Photo
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- GALLERY -->
+
+    <h2 class="gallery-title">
+        Photo Gallery
+    </h2>
+
+
+    {% if photos %}
+
+        <div class="gallery">
+
+            {% for photo in photos %}
+
+                <div class="photo-card">
+
+                    <img
+                        src="{{ photo.photo.url }}"
+                        alt="{{ photo.caption|default:'Site photo' }}"
+                    >
+
+
+                    <div class="photo-info">
+
+                        <h3>
+                            {{ photo.caption|default:"Site Photo" }}
+                        </h3>
+
+
+                        <span class="category">
+                            {{ photo.get_category_display }}
+                        </span>
+
+
+                        {% if photo.parcel %}
+
+                            <p>
+                                <strong>Parcel:</strong>
+                                {{ photo.parcel.parcel_id }}
+                            </p>
+
+                        {% endif %}
+
+                        <form
+    method="POST"
+    action="{% url 'delete_site_photo' photo.id %}"
+    onsubmit="return confirm('Are you sure you want to delete this site photo?');"
+    style="margin-top: 12px;"
+>
+    {% csrf_token %}
+
+    <button
+        type="submit"
+        style="
+            background:#7f1d1d;
+            color:#fecaca;
+            border:1px solid #991b1b;
+            padding:7px 11px;
+            border-radius:6px;
+            cursor:pointer;
+            font-size:12px;
+            font-weight:bold;
+        "
+    >
+        🗑️ Delete Photo
+    </button>
+
+</form>
+
+
+                        <p>
+                            <strong>Uploaded:</strong>
+                            {{ photo.uploaded_at|date:"d M Y, h:i A" }}
+                        </p>
+
+
+                        {% if photo.uploaded_by %}
+
+                            <p>
+                                <strong>Officer:</strong>
+                                {{ photo.uploaded_by.username }}
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="empty">
+
+            📷 No site photos uploaded yet.
+
+        </div>
+
+    {% endif %}
+
+
+    <a
+        href="{% url 'project_progress' project.id %}"
+        class="back"
+    >
+        ← Back to Project Progress
+    </a>
+
+</div>
+
+</body>
+
+</html>

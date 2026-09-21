@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Officer Login | NLAMS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+    <h1>NLAMS Officer Login</h1>
+
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Username</label><br>
+        <input type="text" name="username" required>
+
+        <br><br>
+
+        <label>Password</label><br>
+        <input type="password" name="password" required>
+
+        <br><br>
+
+        <button type="submit">Officer Login</button>
+    </form>
+
+</body>
+</html>

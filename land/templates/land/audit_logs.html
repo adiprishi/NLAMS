@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Audit History | NLAMS</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #07111f;
+            color: #e5e7eb;
+        }
+
+        .container {
+            max-width: 1250px;
+            margin: auto;
+            padding: 35px 25px;
+        }
+
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: white;
+        }
+
+        .header p {
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        .audit-card {
+            background: #0d1b2a;
+            border: 1px solid #1e334b;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        th {
+            background: #111f31;
+            color: #94a3b8;
+            padding: 15px;
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #1a2b40;
+            font-size: 13px;
+        }
+
+        tr:hover td {
+            background: #102235;
+        }
+
+        .action {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .delete {
+            background: rgba(127, 29, 29, 0.25);
+            color: #fca5a5;
+        }
+
+        .upload {
+            background: rgba(21, 128, 61, 0.25);
+            color: #86efac;
+        }
+
+        .create {
+            background: rgba(37, 99, 235, 0.25);
+            color: #93c5fd;
+        }
+
+        .update {
+            background: rgba(147, 51, 234, 0.25);
+            color: #d8b4fe;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 50px;
+            color: #64748b;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 22px;
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+
+        <h1>🛡️ Audit History</h1>
+
+        <p>
+            Record of actions performed within the NLAMS system.
+        </p>
+
+    </div>
+
+
+    <div class="audit-card">
+
+        {% if logs %}
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Officer</th>
+                            <th>Action</th>
+                            <th>Module</th>
+                            <th>Record</th>
+                            <th>Description</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for log in logs %}
+
+                            <tr>
+
+                                <td>
+                                    {{ log.created_at|date:"d M Y, h:i A" }}
+                                </td>
+
+                                <td>
+                                    {% if log.user %}
+                                        {{ log.user.username }}
+                                    {% else %}
+                                        System
+                                    {% endif %}
+                                </td>
+
+                                <td>
+
+                                    <span class="action {{ log.action|lower }}">
+                                        {{ log.get_action_display }}
+                                    </span>
+
+                                </td>
+
+                                <td>
+                                    {{ log.model_name }}
+                                </td>
+
+                                <td>
+                                    {{ log.object_id }}
+                                </td>
+
+                                <td>
+                                    {{ log.description }}
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="empty">
+                🛡️ No audit records found.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <a
+        href="{% url 'home' %}"
+        class="back"
+    >
+        ← Back to Dashboard
+    </a>
+
+</div>
+
+</body>
+
+</html>

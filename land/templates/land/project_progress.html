@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project.project_name }} | NLAMS Project Progress</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #fff !important; }
+            .print-card {
+                box-shadow: none !important;
+                border: 1px solid #d1d5db !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900">
+
+<!-- TOP NAV -->
+<header class="no-print bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-[1500px] mx-auto px-5 lg:px-8">
+        <div class="min-h-20 py-3 flex flex-wrap items-center justify-between gap-4">
+
+            <a href="{% url 'home' %}" class="flex items-center gap-3 shrink-0">
+                <div class="w-11 h-11 rounded-xl bg-blue-700 text-white flex items-center justify-center shadow-sm">
+                    <span class="text-xl">🏛</span>
+                </div>
+                <div>
+                    <div class="text-xs font-bold tracking-[0.18em] text-blue-700">NLAMS</div>
+                    <div class="text-lg font-bold text-slate-900 leading-tight">
+                        National Land Acquisition
+                    </div>
+                </div>
+            </a>
+
+            <nav class="hidden xl:flex items-center gap-1">
+                <a href="{% url 'home' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Dashboard</a>
+                <a href="{% url 'projects' %}" class="px-3 py-2 rounded-lg bg-blue-50 text-blue-700 text-sm font-bold">Projects</a>
+                <a href="{% url 'land_map' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">GIS & Maps</a>
+                <a href="{% url 'compensation_list' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Compensation</a>
+                <a href="{% url 'rr_list' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">R&R</a>
+                <a href="{% url 'possession_list' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Possession</a>
+                <a href="{% url 'reports' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Reports</a>
+            </nav>
+
+            <div class="flex items-center gap-2">
+                <button onclick="window.print()"
+                        class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50">
+                    🖨 Print
+                </button>
+
+                <a href="{% url 'project_workflow' project.id %}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50">
+                    ← Workflow
+                </a>
+            </div>
+
+        </div>
+    </div>
+</header>
+
+
+<main class="max-w-[1500px] mx-auto px-5 lg:px-8 py-8">
+
+    <!-- PROJECT HEADER -->
+    <section class="print-card bg-white border border-slate-200 rounded-2xl shadow-sm p-6 lg:p-7 mb-7">
+
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+
+            <div>
+                <div class="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-blue-700 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                    Project Monitoring
+                </div>
+
+                <h1 class="text-3xl lg:text-4xl font-bold tracking-tight text-slate-950">
+                    {{ project.project_name }}
+                </h1>
+
+                <div class="flex flex-wrap items-center gap-x-5 gap-y-2 mt-3 text-sm text-slate-500">
+                    <span><strong class="text-slate-700">Type:</strong> {{ project.project_type }}</span>
+                    <span><strong class="text-slate-700">Location:</strong> {{ project.district }}, {{ project.state }}</span>
+                    <span><strong class="text-slate-700">Status:</strong> {{ project.get_status_display }}</span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'project_workflow' project.id %}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+                    ⚡ Workflow
+                </a>
+
+                <a href="{% url 'land_map' %}?project={{ project.id }}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50">
+                    🗺 GIS View
+                </a>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- SUMMARY -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
+
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Total Parcels</p>
+            <p class="text-3xl font-bold text-slate-950 mt-3">{{ parcels|length }}</p>
+            <p class="text-xs text-slate-500 mt-1">Land parcels in project</p>
+        </div>
+
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Compensation Records</p>
+            <p class="text-3xl font-bold text-blue-700 mt-3">{{ compensation_records|length }}</p>
+            <p class="text-xs text-slate-500 mt-1">Payment records</p>
+        </div>
+
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-500">R&R Cases</p>
+            <p class="text-3xl font-bold text-violet-700 mt-3">{{ rr_cases|length }}</p>
+            <p class="text-xs text-slate-500 mt-1">Rehabilitation cases</p>
+        </div>
+
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Possession Records</p>
+            <p class="text-3xl font-bold text-emerald-700 mt-3">{{ possession_records|length }}</p>
+            <p class="text-xs text-slate-500 mt-1">Possession entries</p>
+        </div>
+
+    </section>
+
+
+    <!-- OVERALL PROGRESS -->
+    <section class="print-card bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mb-7">
+
+        <div class="px-5 lg:px-7 py-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <p class="text-xs font-bold tracking-widest uppercase text-blue-700">
+                    Acquisition Progress
+                </p>
+                <h2 class="text-xl font-bold text-slate-950 mt-1">
+                    Overall Project Progress
+                </h2>
+            </div>
+
+            <div class="text-3xl font-bold text-blue-700">
+                {{ progress }}%
+            </div>
+        </div>
+
+
+        <div class="p-5 lg:p-7">
+
+            <div class="h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                <div class="h-full bg-blue-700 rounded-full transition-all"
+                     style="width: {{ progress }}%;">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-7">
+
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                    <div class="text-2xl font-bold text-slate-900">{{ total_parcels }}</div>
+                    <div class="text-xs text-slate-500 mt-1">Total Parcels</div>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                    <div class="text-2xl font-bold text-blue-700">{{ verified_parcels }}</div>
+                    <div class="text-xs text-slate-500 mt-1">Verified</div>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                    <div class="text-2xl font-bold text-amber-700">{{ notified_parcels }}</div>
+                    <div class="text-xs text-slate-500 mt-1">Notified</div>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                    <div class="text-2xl font-bold text-indigo-700">{{ acquired_parcels }}</div>
+                    <div class="text-xs text-slate-500 mt-1">Acquired</div>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                    <div class="text-2xl font-bold text-emerald-700">{{ possession_parcels }}</div>
+                    <div class="text-xs text-slate-500 mt-1">Possession</div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ATTENTION -->
+    <section class="print-card bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mb-7">
+
+        <div class="px-5 lg:px-7 py-5 border-b border-slate-200">
+            <p class="text-xs font-bold tracking-widest uppercase text-blue-700">
+                Monitoring
+            </p>
+            <h2 class="text-xl font-bold text-slate-950 mt-1">
+                Attention Required
+            </h2>
+        </div>
+
+        <div class="p-5 lg:p-7">
+
+            {% if attention_items %}
+
+                <div class="space-y-3">
+
+                    {% for item in attention_items %}
+
+                        <div class="rounded-xl border p-4
+                            {% if item.severity == 'High' %}
+                                bg-red-50 border-red-200
+                            {% else %}
+                                bg-amber-50 border-amber-200
+                            {% endif %}">
+
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+                                <div>
+                                    <div class="font-bold text-slate-900">
+                                        {{ item.title }}
+                                    </div>
+
+                                    <div class="text-sm text-slate-600 mt-1">
+                                        {{ item.description }}
+                                    </div>
+                                </div>
+
+                                <span class="inline-flex self-start px-3 py-1 rounded-full text-xs font-bold
+                                    {% if item.severity == 'High' %}
+                                        bg-red-100 text-red-700
+                                    {% else %}
+                                        bg-amber-100 text-amber-700
+                                    {% endif %}">
+                                    {{ item.severity }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-4 text-sm font-semibold text-emerald-700">
+                    ✓ No issues currently require attention.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- NEXT ACTION -->
+    <section class="print-card bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mb-7">
+
+        <div class="px-5 lg:px-7 py-5 border-b border-slate-200">
+            <p class="text-xs font-bold tracking-widest uppercase text-blue-700">
+                Operational Guidance
+            </p>
+            <h2 class="text-xl font-bold text-slate-950 mt-1">
+                Next Action
+            </h2>
+        </div>
+
+        <div class="p-5 lg:p-7">
+            <div class="rounded-xl bg-blue-50 border border-blue-100 border-l-4 border-l-blue-700 p-5">
+                <div class="text-xs font-bold uppercase tracking-wide text-blue-700">
+                    Recommended operational action
+                </div>
+
+                <div class="text-lg font-bold text-blue-950 mt-2">
+                    {{ next_action }}
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- COST INTELLIGENCE -->
+    <section class="print-card bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mb-7">
+
+        <div class="px-5 lg:px-7 py-5 border-b border-slate-200">
+            <p class="text-xs font-bold tracking-widest uppercase text-blue-700">
+                Financial Monitoring
+            </p>
+            <h2 class="text-xl font-bold text-slate-950 mt-1">
+                Cost Intelligence
+            </h2>
+        </div>
+
+
+        <div class="p-5 lg:p-7">
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                    <div class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                        Total Assessed
+                    </div>
+                    <div class="text-2xl font-bold text-slate-950 mt-3">
+                        ₹{{ total_assessed|floatformat:2 }}
+                    </div>
+                </div>
+
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
+                    <div class="text-xs font-bold uppercase tracking-wide text-emerald-700">
+                        Amount Paid
+                    </div>
+                    <div class="text-2xl font-bold text-emerald-700 mt-3">
+                        ₹{{ total_paid|floatformat:2 }}
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+                    <div class="text-xs font-bold uppercase tracking-wide text-amber-700">
+                        Amount Pending
+                    </div>
+                    <div class="text-2xl font-bold text-amber-700 mt-3">
+                        ₹{{ total_pending|floatformat:2 }}
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="mt-7">
+
+                <div class="flex items-center justify-between gap-4 mb-2">
+                    <span class="text-sm font-semibold text-slate-700">
+                        Compensation Payment Progress
+                    </span>
+
+                    <strong class="text-sm text-emerald-700">
+                        {% if total_assessed > 0 %}
+                            {% widthratio total_paid total_assessed 100 %}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div class="h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+
+                    {% if total_assessed > 0 %}
+                        <div class="h-full bg-emerald-600 rounded-full"
+                             style="width: {% widthratio total_paid total_assessed 100 %}%;">
+                        </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- SITE EVIDENCE -->
+    <section class="print-card bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mb-7">
+
+        <div class="px-5 lg:px-7 py-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+            <div>
+                <p class="text-xs font-bold tracking-widest uppercase text-blue-700">
+                    Site Evidence
+                </p>
+
+                <h2 class="text-xl font-bold text-slate-950 mt-1">
+                    Project Site Photos
+                </h2>
+
+                <p class="text-sm text-slate-500 mt-1">
+                    Visual documentation of the project site and acquisition progress.
+                </p>
+            </div>
+
+            <a href="{% url 'site_photos' project.id %}"
+               class="text-sm font-bold text-blue-700 hover:text-blue-900">
+                View All Photos →
+            </a>
+
+        </div>
+
+
+        <div class="p-5 lg:p-7">
+
+            {% if site_photos %}
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+                    {% for photo in site_photos|slice:":3" %}
+
+                        <div class="border border-slate-200 rounded-xl overflow-hidden bg-white">
+
+                            <img src="{{ photo.photo.url }}"
+                                 alt="{{ photo.caption|default:'Site photo' }}"
+                                 class="w-full h-52 object-cover">
+
+                            <div class="p-4">
+
+                                <div class="font-bold text-slate-800">
+                                    {{ photo.get_category_display }}
+                                </div>
+
+                                {% if photo.parcel %}
+                                    <div class="text-xs text-slate-500 mt-1">
+                                        Parcel: {{ photo.parcel.parcel_id }}
+                                    </div>
+                                {% endif %}
+
+                                <div class="text-xs text-slate-400 mt-2">
+                                    {{ photo.uploaded_at|date:"d M Y" }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="text-center py-10">
+
+                    <div class="w-14 h-14 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center text-2xl">
+                        📷
+                    </div>
+
+                    <p class="font-semibold text-slate-700 mt-4">
+                        No site photos have been uploaded yet.
+                    </p>
+
+                    <a href="{% url 'site_photos' project.id %}"
+                       class="inline-block mt-2 text-sm font-bold text-blue-700 hover:text-blue-900">
+                        Upload the first site photo →
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- GIS -->
+    <section class="print-card bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+
+        <div class="p-6 lg:p-7 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+
+            <div>
+                <p class="text-xs font-bold tracking-widest uppercase text-blue-700">
+                    Spatial Monitoring
+                </p>
+
+                <h2 class="text-xl font-bold text-slate-950 mt-1">
+                    GIS Project View
+                </h2>
+
+                <p class="text-sm text-slate-500 mt-2 max-w-2xl">
+                    View project parcels, acquisition status and spatial information
+                    on the NLAMS GIS map.
+                </p>
+            </div>
+
+            <a href="{% url 'land_map' %}?project={{ project.id }}"
+               class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+                🗺 Open Project GIS →
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER ACTIONS -->
+    <section class="no-print mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+        <a href="{% url 'projects' %}"
+           class="text-sm font-semibold text-blue-700 hover:text-blue-900">
+            ← Back to Projects
+        </a>
+
+        <div class="flex flex-wrap gap-2">
+
+            <a href="{% url 'project_workflow' project.id %}"
+               class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                View Workflow
+            </a>
+
+            <a href="{% url 'reports' %}"
+               class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                View Reports
+            </a>
+
+            <button onclick="window.print()"
+                    class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                🖨 Print Progress
+            </button>
+
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>

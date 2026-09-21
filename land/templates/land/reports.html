@@ -1,844 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Reports & MIS | NLAMS</title>
 
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #07111f;
-            color: #e5e7eb;
-        }
-
-        /* NAVIGATION */
-
-        .top-nav {
-            width: 100%;
-            background: #0d1b2a;
-            border-bottom: 1px solid #1e334b;
-            padding: 14px 25px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .nav-logo {
-            color: #ffffff;
-            font-size: 18px;
-            font-weight: bold;
-            margin-right: 20px;
-        }
-
-        .top-nav a {
-            color: #94a3b8;
-            text-decoration: none;
-            padding: 9px 13px;
-            border-radius: 7px;
-            font-size: 13px;
-            transition: 0.2s;
-        }
-
-        .top-nav a:hover {
-            background: #102235;
-            color: #ffffff;
-        }
-
-        .top-nav a.active {
-            background: #0c4a6e;
-            color: #7dd3fc;
-        }
-
-        /* CONTAINER */
-
-        .container {
-            max-width: 1250px;
-            margin: auto;
-            padding: 35px 25px;
-        }
-
-        /* HEADER */
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            gap: 20px;
-        }
-
-        .header h1 {
-            margin: 0;
-            color: #ffffff;
-            font-size: 30px;
-        }
-
-        .header p {
-            margin-top: 8px;
-            color: #94a3b8;
-            font-size: 14px;
-        }
-
-        .print-btn {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 12px 18px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 13px;
-        }
-
-        .print-btn:hover {
-            background: #1d4ed8;
-        }
-
-        /* KPI GRID */
-
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-            margin-bottom: 25px;
-        }
-
-        .kpi {
-            background: #0d1b2a;
-            border: 1px solid #1e334b;
-            border-radius: 12px;
-            padding: 20px;
-        }
-
-        .kpi-label {
-            color: #94a3b8;
-            font-size: 12px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .kpi-value {
-            color: #ffffff;
-            font-size: 27px;
-            font-weight: bold;
-        }
-
-        .kpi-sub {
-            margin-top: 7px;
-            color: #64748b;
-            font-size: 12px;
-        }
-
-        /* REPORT GRID */
-
-        .report-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-        .report-card {
-            background: #0d1b2a;
-            border: 1px solid #1e334b;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .report-title {
-            padding: 20px;
-            border-bottom: 1px solid #1e334b;
-        }
-
-        .report-title h2 {
-            margin: 0;
-            font-size: 17px;
-            color: #ffffff;
-        }
-
-        .report-title p {
-            margin: 6px 0 0;
-            color: #64748b;
-            font-size: 12px;
-        }
-
-        /* METRICS */
-
-        .metric-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            border-bottom: 1px solid #1a2b40;
-        }
-
-        .metric-row:last-child {
-            border-bottom: none;
-        }
-
-        .metric-name {
-            color: #cbd5e1;
-            font-size: 14px;
-        }
-
-        .metric-value {
-            color: #ffffff;
-            font-weight: bold;
-        }
-
-        /* PROGRESS */
-
-        .progress-container {
-            padding: 20px;
-        }
-
-        .progress-item {
-            margin-bottom: 20px;
-        }
-
-        .progress-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 13px;
-        }
-
-        .progress-label span:first-child {
-            color: #cbd5e1;
-        }
-
-        .progress-label span:last-child {
-            color: #60a5fa;
-            font-weight: bold;
-        }
-
-        .progress-bar {
-            height: 8px;
-            background: #17283b;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: #2563eb;
-            border-radius: 10px;
-        }
-
-        /* COMPENSATION */
-
-        .money-box {
-            padding: 25px 20px;
-            text-align: center;
-        }
-
-        .money-main {
-            font-size: 30px;
-            color: #ffffff;
-            font-weight: bold;
-        }
-
-        .money-label {
-            color: #64748b;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        .money-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            border-top: 1px solid #1a2b40;
-        }
-
-        .money-stat {
-            padding: 18px;
-            text-align: center;
-        }
-
-        .money-stat + .money-stat {
-            border-left: 1px solid #1a2b40;
-        }
-
-        .money-stat strong {
-            display: block;
-            color: #ffffff;
-            font-size: 18px;
-        }
-
-        .money-stat span {
-            color: #64748b;
-            font-size: 11px;
-        }
-
-        /* PRINT */
-
         @media print {
-
-            body {
-                background: white;
-                color: black;
-            }
-
-            .top-nav,
-            .print-btn {
-                display: none;
-            }
-
-            .container {
-                max-width: 100%;
-                padding: 10px;
-            }
-
-            .kpi,
-            .report-card {
-                border: 1px solid #ccc;
-                background: white;
-            }
-
-            .kpi-value,
-            .report-title h2,
-            .metric-value,
-            .money-main,
-            .money-stat strong {
-                color: black;
-            }
-
-            .kpi-label,
-            .kpi-sub,
-            .report-title p,
-            .metric-name,
-            .money-label,
-            .money-stat span {
-                color: #555;
-            }
-
+            .no-print { display:none !important; }
+            body { background:white !important; }
+            .print-card { box-shadow:none !important; border:1px solid #d1d5db !important; break-inside:avoid; }
         }
-
-        /* MOBILE */
-
-        @media (max-width: 900px) {
-
-            .kpi-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .report-grid {
-                grid-template-columns: 1fr;
-            }
-
-        }
-
-        @media (max-width: 600px) {
-
-            .kpi-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .container {
-                padding: 25px 15px;
-            }
-
-            .header h1 {
-                font-size: 25px;
-            }
-
-        }
-
     </style>
-
 </head>
 
-
-<body>
-
+<body class="bg-slate-50 text-slate-900">
 
 <!-- NAVIGATION -->
+<header class="no-print bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-[1500px] mx-auto px-5 lg:px-8">
+        <div class="h-20 flex items-center justify-between gap-6">
 
-<nav class="top-nav">
+            <a href="{% url 'home' %}" class="flex items-center gap-3 shrink-0">
+                <div class="w-11 h-11 rounded-xl bg-blue-700 text-white flex items-center justify-center shadow-sm">
+                    <span class="text-xl">🏛</span>
+                </div>
+                <div>
+                    <div class="text-xs font-bold tracking-[0.18em] text-blue-700">NLAMS</div>
+                    <div class="text-lg font-bold text-slate-900 leading-tight">
+                        National Land Acquisition
+                    </div>
+                </div>
+            </a>
 
-    <div class="nav-logo">
-        🏛️ NLAMS
+            <nav class="hidden xl:flex items-center gap-1">
+                <a href="{% url 'home' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Dashboard</a>
+                <a href="{% url 'projects' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Projects</a>
+                <a href="{% url 'land_map' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">GIS & Maps</a>
+                <a href="{% url 'compensation_list' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Compensation</a>
+                <a href="{% url 'rr_list' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">R&R</a>
+                <a href="{% url 'possession_list' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Possession</a>
+                <a href="{% url 'reports' %}" class="px-3 py-2 rounded-lg bg-blue-50 text-blue-700 text-sm font-bold">Reports</a>
+            </nav>
+
+            <button onclick="window.print()" class="no-print inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+                <span>🖨</span>
+                Print Report
+            </button>
+        </div>
     </div>
+</header>
 
-    <a href="{% url 'home' %}">
-        📊 Dashboard
-    </a>
+<main class="max-w-[1500px] mx-auto px-5 lg:px-8 py-8">
 
-    <a href="{% url 'projects' %}">
-        📁 Projects
-    </a>
+    <!-- PAGE HEADER -->
+    <section class="mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+            <div>
+                <div class="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-blue-700 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                    Monitoring & Management Information System
+                </div>
 
-    <a href="{% url 'land_map' %}">
-        🗺️ Land Parcels
-    </a>
+                <h1 class="text-3xl lg:text-4xl font-bold tracking-tight text-slate-950">
+                    Reports & MIS
+                </h1>
 
-    <a href="{% url 'compensation_list' %}">
-        💰 Compensation
-    </a>
+                <p class="mt-2 text-slate-500 max-w-2xl">
+                    A consolidated view of project progress, land acquisition,
+                    compensation, rehabilitation and possession.
+                </p>
+            </div>
 
-    <a href="{% url 'rr_list' %}">
-        🏠 R&R
-    </a>
-
-    <a href="{% url 'possession_list' %}">
-        📍 Possession
-    </a>
-
-    <a href="{% url 'reports' %}" class="active">
-        📑 Reports
-    </a>
-
-</nav>
-
-
-<!-- MAIN -->
-
-<div class="container">
+            <div class="text-sm text-slate-500 bg-white border border-slate-200 rounded-xl px-4 py-3">
+                <span class="font-semibold text-slate-700">NLAMS</span>
+                · National monitoring dashboard
+            </div>
+        </div>
+    </section>
 
 
-    <!-- HEADER -->
+    <!-- KPI OVERVIEW -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-7">
 
-    <div class="header">
-
-        <div>
-
-            <h1>📑 Reports & MIS</h1>
-
-            <p>
-                National land acquisition monitoring and management information system.
-            </p>
-
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Total Projects</p>
+                <span class="w-9 h-9 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">📁</span>
+            </div>
+            <p class="text-3xl font-bold text-slate-950 mt-4">{{ total_projects }}</p>
+            <p class="text-xs text-slate-500 mt-1">Registered acquisition projects</p>
         </div>
 
-        <button class="print-btn" onclick="window.print()">
-            🖨️ Print Report
-        </button>
-
-    </div>
-
-
-    <!-- KPI CARDS -->
-
-    <div class="kpi-grid">
-
-
-        <div class="kpi">
-
-            <div class="kpi-label">
-                Total Projects
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Active Projects</p>
+                <span class="w-9 h-9 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">◷</span>
             </div>
-
-            <div class="kpi-value">
-                {{ total_projects }}
-            </div>
-
-            <div class="kpi-sub">
-                Registered acquisition projects
-            </div>
-
+            <p class="text-3xl font-bold text-slate-950 mt-4">{{ active_projects }}</p>
+            <p class="text-xs text-slate-500 mt-1">Projects currently in progress</p>
         </div>
 
-
-        <div class="kpi">
-
-            <div class="kpi-label">
-                Active Projects
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Completed Projects</p>
+                <span class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">✓</span>
             </div>
-
-            <div class="kpi-value">
-                {{ active_projects }}
-            </div>
-
-            <div class="kpi-sub">
-                Projects currently in progress
-            </div>
-
+            <p class="text-3xl font-bold text-slate-950 mt-4">{{ completed_projects }}</p>
+            <p class="text-xs text-slate-500 mt-1">Acquisition workflows completed</p>
         </div>
 
-
-        <div class="kpi">
-
-            <div class="kpi-label">
-                Completed Projects
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Land Required</p>
+                <span class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center">▱</span>
             </div>
-
-            <div class="kpi-value">
-                {{ completed_projects }}
-            </div>
-
-            <div class="kpi-sub">
-                Acquisition workflows completed
-            </div>
-
+            <p class="text-3xl font-bold text-slate-950 mt-4">{{ total_land|floatformat:1 }}</p>
+            <p class="text-xs text-slate-500 mt-1">Total acres across projects</p>
         </div>
 
-
-        <div class="kpi">
-
-            <div class="kpi-label">
-                Land Required
-            </div>
-
-            <div class="kpi-value">
-                {{ total_land|floatformat:1 }}
-            </div>
-
-            <div class="kpi-sub">
-                Total acres across projects
-            </div>
-
-        </div>
-
-    </div>
+    </section>
 
 
-    <!-- REPORT CARDS -->
-
-    <div class="report-grid">
-
+    <!-- REPORT GRID -->
+    <section class="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
         <!-- LAND ACQUISITION -->
-
-        <div class="report-card">
-
-            <div class="report-title">
-
-                <h2>🗺️ Land Acquisition Status</h2>
-
-                <p>
-                    Parcel-level acquisition and possession progress.
-                </p>
-
-            </div>
-
-
-            <div class="metric-row">
-
-                <span class="metric-name">
-                    Total Land Parcels
-                </span>
-
-                <span class="metric-value">
-                    {{ total_parcels }}
-                </span>
-
-            </div>
-
-
-            <div class="metric-row">
-
-                <span class="metric-name">
-                    Acquired Parcels
-                </span>
-
-                <span class="metric-value">
-                    {{ acquired_parcels }}
-                </span>
-
-            </div>
-
-
-            <div class="metric-row">
-
-                <span class="metric-name">
-                    Possession Taken
-                </span>
-
-                <span class="metric-value">
-                    {{ possession_parcels }}
-                </span>
-
-            </div>
-
-
-            <div class="progress-container">
-
-                <div class="progress-item">
-
-                    <div class="progress-label">
-
-                        <span>
-                            Acquisition Progress
-                        </span>
-
-                        <span>
-                            {% if total_parcels %}
-                                {% widthratio acquired_parcels total_parcels 100 %}%
-                            {% else %}
-                                0%
-                            {% endif %}
-                        </span>
-
+        <article class="print-card bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-200">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">🗺</div>
+                    <div>
+                        <h2 class="font-bold text-lg text-slate-950">Land Acquisition Status</h2>
+                        <p class="text-xs text-slate-500 mt-1">Parcel-level acquisition and possession progress.</p>
                     </div>
+                </div>
+            </div>
 
-                    <div class="progress-bar">
+            <div class="divide-y divide-slate-100">
+                <div class="flex justify-between px-5 py-4">
+                    <span class="text-sm text-slate-500">Total Land Parcels</span>
+                    <strong>{{ total_parcels }}</strong>
+                </div>
+                <div class="flex justify-between px-5 py-4">
+                    <span class="text-sm text-slate-500">Acquired Parcels</span>
+                    <strong class="text-blue-700">{{ acquired_parcels }}</strong>
+                </div>
+                <div class="flex justify-between px-5 py-4">
+                    <span class="text-sm text-slate-500">Possession Taken</span>
+                    <strong class="text-emerald-700">{{ possession_parcels }}</strong>
+                </div>
+            </div>
 
-                        {% if total_parcels %}
-                            <div
-                                class="progress-fill"
-                                style="width: {% widthratio acquired_parcels total_parcels 100 %}%;">
-                            </div>
-                        {% else %}
-                            <div
-                                class="progress-fill"
-                                style="width: 0%;">
-                            </div>
-                        {% endif %}
+            <div class="p-5 bg-slate-50 border-t border-slate-200 space-y-5">
 
+                <div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="font-medium text-slate-600">Acquisition Progress</span>
+                        <strong class="text-blue-700">
+                            {% if total_parcels %}{% widthratio acquired_parcels total_parcels 100 %}%{% else %}0%{% endif %}
+                        </strong>
                     </div>
-
+                    <div class="h-2 rounded-full bg-slate-200 overflow-hidden">
+                        <div class="h-full rounded-full bg-blue-600"
+                             style="width:{% if total_parcels %}{% widthratio acquired_parcels total_parcels 100 %}{% else %}0{% endif %}%"></div>
+                    </div>
                 </div>
 
-
-                <div class="progress-item">
-
-                    <div class="progress-label">
-
-                        <span>
-                            Possession Progress
-                        </span>
-
-                        <span>
-                            {% if total_parcels %}
-                                {% widthratio possession_parcels total_parcels 100 %}%
-                            {% else %}
-                                0%
-                            {% endif %}
-                        </span>
-
+                <div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="font-medium text-slate-600">Possession Progress</span>
+                        <strong class="text-emerald-700">
+                            {% if total_parcels %}{% widthratio possession_parcels total_parcels 100 %}%{% else %}0%{% endif %}
+                        </strong>
                     </div>
-
-                    <div class="progress-bar">
-
-                        <div
-                            class="progress-fill"
-                            style="width: {% if total_parcels %}{% widthratio possession_parcels total_parcels 100 %}{% else %}0{% endif %}%;">
-                        </div>
-
+                    <div class="h-2 rounded-full bg-slate-200 overflow-hidden">
+                        <div class="h-full rounded-full bg-emerald-500"
+                             style="width:{% if total_parcels %}{% widthratio possession_parcels total_parcels 100 %}{% else %}0{% endif %}%"></div>
                     </div>
-
                 </div>
 
             </div>
-
-        </div>
+        </article>
 
 
         <!-- COMPENSATION -->
-
-        <div class="report-card">
-
-            <div class="report-title">
-
-                <h2>💰 Compensation Summary</h2>
-
-                <p>
-                    Assessment and payment monitoring.
-                </p>
-
+        <article class="print-card bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-200">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">₹</div>
+                    <div>
+                        <h2 class="font-bold text-lg text-slate-950">Compensation Summary</h2>
+                        <p class="text-xs text-slate-500 mt-1">Assessment and payment monitoring.</p>
+                    </div>
+                </div>
             </div>
 
-
-            <div class="money-box">
-
-                <div class="money-main">
-                    ₹{{ total_paid|floatformat:0 }}
-                </div>
-
-                <div class="money-label">
-                    Total Compensation Paid
-                </div>
-
+            <div class="p-7 text-center">
+                <p class="text-xs uppercase tracking-widest font-bold text-slate-500">Total Compensation Paid</p>
+                <p class="text-4xl font-bold text-slate-950 mt-3">₹{{ total_paid|floatformat:0 }}</p>
             </div>
 
-
-            <div class="money-row">
-
-                <div class="money-stat">
-
-                    <strong>
-                        ₹{{ total_assessed|floatformat:0 }}
-                    </strong>
-
-                    <span>
-                        Total Assessed
-                    </span>
-
+            <div class="grid grid-cols-2 border-t border-slate-200">
+                <div class="p-5 text-center">
+                    <p class="text-xl font-bold text-slate-900">₹{{ total_assessed|floatformat:0 }}</p>
+                    <p class="text-xs text-slate-500 mt-1">Total Assessed</p>
                 </div>
-
-
-                <div class="money-stat">
-
-                    <strong>
-                        ₹{{ total_paid|floatformat:0 }}
-                    </strong>
-
-                    <span>
-                        Total Paid
-                    </span>
-
+                <div class="p-5 text-center border-l border-slate-200">
+                    <p class="text-xl font-bold text-emerald-700">₹{{ total_paid|floatformat:0 }}</p>
+                    <p class="text-xs text-slate-500 mt-1">Total Paid</p>
                 </div>
-
             </div>
-
-        </div>
+        </article>
 
 
         <!-- R&R -->
-
-        <div class="report-card">
-
-            <div class="report-title">
-
-                <h2>🏠 Rehabilitation & Resettlement</h2>
-
-                <p>
-                    Monitoring of affected and displaced families.
-                </p>
-
-            </div>
-
-
-            <div class="metric-row">
-
-                <span class="metric-name">
-                    Total R&R Cases
-                </span>
-
-                <span class="metric-value">
-                    {{ total_rr }}
-                </span>
-
-            </div>
-
-
-            <div class="metric-row">
-
-                <span class="metric-name">
-                    Completed R&R
-                </span>
-
-                <span class="metric-value">
-                    {{ completed_rr }}
-                </span>
-
-            </div>
-
-
-            <div class="progress-container">
-
-                <div class="progress-item">
-
-                    <div class="progress-label">
-
-                        <span>
-                            R&R Completion
-                        </span>
-
-                        <span>
-                            {% if total_rr %}{% widthratio completed_rr total_rr 100 %}%{% else %}0%{% endif %}
-                        </span>
-
+        <article class="print-card bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-200">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center">⌂</div>
+                    <div>
+                        <h2 class="font-bold text-lg text-slate-950">Rehabilitation & Resettlement</h2>
+                        <p class="text-xs text-slate-500 mt-1">Monitoring of affected and displaced families.</p>
                     </div>
-
-
-                    <div class="progress-bar">
-
-                        <div
-                            class="progress-fill"
-                            style="width: {% if total_rr %}{% widthratio completed_rr total_rr 100 %}{% else %}0{% endif %}%;">
-                        </div>
-
-                    </div>
-
                 </div>
-
             </div>
 
-        </div>
+            <div class="divide-y divide-slate-100">
+                <div class="flex justify-between px-5 py-4">
+                    <span class="text-sm text-slate-500">Total R&R Cases</span>
+                    <strong>{{ total_rr }}</strong>
+                </div>
+                <div class="flex justify-between px-5 py-4">
+                    <span class="text-sm text-slate-500">Completed R&R</span>
+                    <strong class="text-violet-700">{{ completed_rr }}</strong>
+                </div>
+            </div>
+
+            <div class="p-5 bg-slate-50 border-t border-slate-200">
+                <div class="flex justify-between text-sm mb-2">
+                    <span class="font-medium text-slate-600">R&R Completion</span>
+                    <strong class="text-violet-700">
+                        {% if total_rr %}{% widthratio completed_rr total_rr 100 %}%{% else %}0%{% endif %}
+                    </strong>
+                </div>
+                <div class="h-2 rounded-full bg-slate-200 overflow-hidden">
+                    <div class="h-full rounded-full bg-violet-600"
+                         style="width:{% if total_rr %}{% widthratio completed_rr total_rr 100 %}{% else %}0{% endif %}%"></div>
+                </div>
+            </div>
+        </article>
 
 
         <!-- POSSESSION -->
-
-        <div class="report-card">
-
-            <div class="report-title">
-
-                <h2>📍 Possession Monitoring</h2>
-
-                <p>
-                    Parcel handover and possession status.
-                </p>
-
+        <article class="print-card bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-200">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">⌖</div>
+                    <div>
+                        <h2 class="font-bold text-lg text-slate-950">Possession Monitoring</h2>
+                        <p class="text-xs text-slate-500 mt-1">Parcel handover and possession status.</p>
+                    </div>
+                </div>
             </div>
 
-
-            <div class="metric-row">
-
-                <span class="metric-name">
-                    Total Parcels
-                </span>
-
-                <span class="metric-value">
-                    {{ total_parcels }}
-                </span>
-
+            <div class="divide-y divide-slate-100">
+                <div class="flex justify-between px-5 py-4">
+                    <span class="text-sm text-slate-500">Total Parcels</span>
+                    <strong>{{ total_parcels }}</strong>
+                </div>
+                <div class="flex justify-between px-5 py-4">
+                    <span class="text-sm text-slate-500">Possession Taken</span>
+                    <strong class="text-emerald-700">{{ possession_parcels }}</strong>
+                </div>
+                <div class="flex justify-between px-5 py-4">
+                    <span class="text-sm text-slate-500">Remaining</span>
+                    <strong class="text-amber-700">{{ total_parcels|add:"-"|add:possession_parcels }}</strong>
+                </div>
             </div>
 
-
-            <div class="metric-row">
-
-                <span class="metric-name">
-                    Possession Taken
-                </span>
-
-                <span class="metric-value">
-                    {{ possession_parcels }}
-                </span>
-
+            <div class="p-5 bg-slate-50 border-t border-slate-200">
+                <div class="flex justify-between text-sm mb-2">
+                    <span class="font-medium text-slate-600">Possession Progress</span>
+                    <strong class="text-emerald-700">
+                        {% if total_parcels %}{% widthratio possession_parcels total_parcels 100 %}%{% else %}0%{% endif %}
+                    </strong>
+                </div>
+                <div class="h-2 rounded-full bg-slate-200 overflow-hidden">
+                    <div class="h-full rounded-full bg-emerald-500"
+                         style="width:{% if total_parcels %}{% widthratio possession_parcels total_parcels 100 %}{% else %}0{% endif %}%"></div>
+                </div>
             </div>
+        </article>
+
+    </section>
 
 
-            <div class="metric-row">
-
-                <span class="metric-name">
-                    Remaining
-                </span>
-
-                <span class="metric-value">
-                    {{ total_parcels|add:"-"|add:possession_parcels }}
-                </span>
-
-            </div>
-
+    <!-- REPORT FOOTER -->
+    <section class="mt-7 bg-white border border-slate-200 rounded-2xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+            <p class="font-semibold text-slate-800">NLAMS Management Information System</p>
+            <p class="text-xs text-slate-500 mt-1">
+                Consolidated operational indicators from the current system records.
+            </p>
         </div>
 
+        <div class="flex gap-2 no-print">
+            <a href="{% url 'projects' %}" class="px-4 py-2 rounded-lg border border-slate-300 text-sm font-semibold hover:bg-slate-50">
+                View Projects
+            </a>
+            <a href="{% url 'land_map' %}" class="px-4 py-2 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800">
+                Open GIS
+            </a>
+        </div>
+    </section>
 
-    </div>
-
-</div>
-
+</main>
 
 </body>
-
 </html>

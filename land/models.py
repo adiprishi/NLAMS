@@ -1,4 +1,4 @@
-from django.db import models  # pyright: ignore[reportMissingImports]
+from django.contrib.gis.db import models
 
 
 class Project(models.Model):
@@ -70,6 +70,20 @@ class LandParcel(models.Model):
         decimal_places=6
     )
 
+    location = models.PointField(
+        geography=True,
+        srid=4326,
+        null=True,
+        blank=True
+    )
+
+    boundary_geometry = models.PolygonField(
+        geography=True,
+        srid=4326,
+        null=True,
+        blank=True
+    )
+
     boundary = models.JSONField(default=list, blank=True)
 
     status = models.CharField(
@@ -82,6 +96,32 @@ class LandParcel(models.Model):
 
     def __str__(self):
         return self.parcel_id
+
+    @property
+    def gis_area_acres(self):
+        if not self.boundary_geometry:
+            return None
+
+        area_sq_m = self.boundary_geometry.transform(
+            32646,
+            clone=True
+        ).area
+
+        return area_sq_m / 4046.8564224
+
+    @property
+    def area_difference_acres(self):
+        if self.gis_area_acres is None:
+            return None
+
+        return self.gis_area_acres - float(self.area)
+
+    @property
+    def has_area_discrepancy(self):
+        if self.area_difference_acres is None:
+            return False
+
+        return abs(self.area_difference_acres) > 0.01
 
 class Compensation(models.Model):
 
@@ -196,6 +236,95 @@ class Possession(models.Model):
     remarks = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+class SitePhoto(models.Model):
+
+    PHOTO_CATEGORY = [
+        ('BEFORE', 'Before Acquisition'),
+        ('DURING', 'During Acquisition'),
+        ('AFTER', 'After Possession'),
+        ('SITE', 'Site Condition'),
+        ('OTHER', 'Other'),
+    ]
+
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        related_name='site_photos'
+    )
+
+    parcel = models.ForeignKey(
+        LandParcel,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='site_photos'
+    )
+
+    photo = models.ImageField(
+        upload_to='site_photos/'
+    )
+
+    category = models.CharField(
+        max_length=20,
+        choices=PHOTO_CATEGORY,
+        default='SITE'
+    )
+
+    caption = models.CharField(
+        max_length=255,
+        blank=True
+    )
+
+    uploaded_by = models.ForeignKey(
+        'auth.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    uploaded_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
     def __str__(self):
+        return f"{self.project.project_name} - {self.category}"
+    def __str__(self):
         return f"{self.parcel.parcel_id} - Possession"
+
+class AuditLog(models.Model):
+
+    ACTION_CHOICES = [
+        ('CREATE', 'Created'),
+        ('UPDATE', 'Updated'),
+        ('DELETE', 'Deleted'),
+        ('UPLOAD', 'Uploaded'),
+    ]
+
+    user = models.ForeignKey(
+        'auth.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    action = models.CharField(
+        max_length=20,
+        choices=ACTION_CHOICES
+    )
+
+    model_name = models.CharField(
+        max_length=100
+    )
+
+    object_id = models.CharField(
+        max_length=100
+    )
+
+    description = models.TextField()
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"{self.user} - {self.action} - {self.model_name}"

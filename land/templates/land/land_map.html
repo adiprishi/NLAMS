@@ -89,7 +89,13 @@
     data-owner="{{ parcel.owner_name|escape }}"
     data-area="{{ parcel.area|escape }}"
     data-status="{{ parcel.get_status_display|escape }}"
-    data-boundary="{{ parcel.boundary|escapejs }}"
+data-boundary="{{ parcel.boundary|escapejs }}"
+data-assessed="{{ parcel.compensation.first.assessed_amount|default:0 }}"
+data-paid="{{ parcel.compensation.first.paid_amount|default:0 }}"
+data-payment-status="{{ parcel.compensation.first.get_payment_status_display|default:'No Record' }}"
+data-possession-status="{{ parcel.possession.first.get_possession_status_display|default:'No Record' }}"
+data-possession-date="{{ parcel.possession.first.possession_date|default:'Not Taken' }}"
+data-rr-count="{{ parcel.project.rr_cases.count }}"
 ></div>
 
         {% endfor %}
@@ -115,15 +121,33 @@
 
 
     // ==========================================
-    // OPEN STREET MAP
-    // ==========================================
+// BASE MAPS
+// ==========================================
 
-    L.tileLayer(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        {
-            attribution: '&copy; OpenStreetMap contributors'
-        }
-    ).addTo(map);
+var streetLayer = L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+    {
+        attribution: 'Tiles &copy; Esri'
+    }
+);
+
+var satelliteLayer = L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    {
+        attribution: 'Tiles &copy; Esri'
+    }
+);
+
+// Start with the normal street map
+streetLayer.addTo(map);
+
+// Map / Satellite switcher
+var baseMaps = {
+    "Map": streetLayer,
+    "Satellite": satelliteLayer
+};
+
+L.control.layers(baseMaps).addTo(map);
 
 
     // ==========================================
@@ -145,7 +169,7 @@
         }
 
         if (status === 'Acquired') {
-            return '#27ae60';
+            return '#ff1744';
         }
 
         if (status === 'Possession Taken') {
@@ -221,37 +245,79 @@
             // POPUP
             // ======================================
 
-            polygon.bindPopup(`
+          polygon.bindPopup(`
 
-                <div class="parcel-popup">
+    <div class="parcel-popup">
 
-                    <b>Parcel ID:</b>
-                    ${parcel.dataset.parcelId}
+        <b>Parcel ID:</b>
+        ${parcel.dataset.parcelId}
 
-                    <br>
+        <br>
 
-                    <b>Owner:</b>
-                    ${parcel.dataset.owner}
+        <b>Owner:</b>
+        ${parcel.dataset.owner}
 
-                    <br>
+        <br>
 
-                    <b>Area:</b>
-                    ${parcel.dataset.area} acres
+        <b>Area:</b>
+        ${parcel.dataset.area} acres
 
-                    <br>
+        <hr>
 
-                    <b>Status:</b>
+        <b>Acquisition Status:</b>
 
-                    <span
-                        class="status-badge"
-                        style="background:${color}; color:white; padding:4px 8px; border-radius:5px;"
-                    >
-                        ${status}
-                    </span>
+        <span
+            class="status-badge"
+            style="background:${color}; color:white; padding:4px 8px; border-radius:5px;"
+        >
+            ${status}
+        </span>
 
-                </div>
+        <hr>
 
-            `);
+        <b>Compensation</b>
+
+        <br>
+
+        Assessed:
+        ₹${Number(parcel.dataset.assessed).toLocaleString('en-IN')}
+
+        <br>
+
+        Paid:
+        ₹${Number(parcel.dataset.paid).toLocaleString('en-IN')}
+
+        <br>
+
+        Payment:
+        ${parcel.dataset.paymentStatus}
+
+        <hr>
+
+        <b>Possession</b>
+
+        <br>
+
+        Status:
+        ${parcel.dataset.possessionStatus}
+
+        <br>
+
+        Date:
+        ${parcel.dataset.possessionDate}
+
+        <hr>
+
+        <b>Project R&R</b>
+
+        <br>
+
+        R&R Cases:
+        ${parcel.dataset.rrCount}
+
+    </div>
+
+`);
 
 
             allParcels.push(polygon);
@@ -345,7 +411,7 @@
                 display:inline-block;
                 width:14px;
                 height:14px;
-                background:#27ae60;
+                background:#ff1744;
                 margin-right:6px;
             "></span>
             Acquired

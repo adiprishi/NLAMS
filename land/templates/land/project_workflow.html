@@ -3,692 +3,527 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>{{ project.project_name }} | NLAMS Workflow</title>
 
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
-        * {
-            box-sizing: border-box;
+        .workflow-scroll::-webkit-scrollbar { height: 6px; }
+        .workflow-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 999px;
         }
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #04111f;
-            color: white;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 92%;
-            max-width: 1200px;
-            margin: auto;
-            padding: 35px 0;
-        }
-
-        .back {
-            color: #7dd3fc;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-        .header {
-            margin-top: 25px;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            margin: 0 0 8px;
-            font-size: 32px;
-        }
-
-        .header p {
-            color: #94a3b8;
-            margin: 0;
-        }
-
-        /* Current action */
-
-        .action-card {
-            background: linear-gradient(
-                135deg,
-                rgba(14, 165, 233, 0.18),
-                rgba(30, 41, 59, 0.7)
-            );
-
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            border-radius: 18px;
-            padding: 25px;
-            margin-bottom: 35px;
-        }
-
-        .action-label {
-            color: #7dd3fc;
-            font-size: 12px;
-            font-weight: bold;
-            letter-spacing: 1.5px;
-        }
-
-        .action-card h2 {
-            margin: 10px 0;
-            font-size: 26px;
-        }
-
-        .next-action {
-            color: #cbd5e1;
-            font-size: 15px;
-        }
-
-        /* Workflow */
-
-        .workflow {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 45px 0;
-        }
-
-        .stage {
-            text-align: center;
-            position: relative;
-            flex: 1;
-        }
-
-        .circle {
-            width: 58px;
-            height: 58px;
-            border-radius: 50%;
-            margin: auto;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            background: #1e293b;
-            border: 2px solid #475569;
-
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        .stage.completed .circle {
-            background: #166534;
-            border-color: #22c55e;
-        }
-
-        .stage.current .circle {
-            background: #0369a1;
-            border-color: #38bdf8;
-            box-shadow: 0 0 20px rgba(56,189,248,0.45);
-        }
-
-        .stage-title {
-            margin-top: 12px;
-            font-size: 12px;
-            color: #cbd5e1;
-        }
-
-        .connector {
-            height: 3px;
-            flex: 0.5;
-            background: #334155;
-            margin-top: -30px;
-        }
-
-        /* Stats */
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 15px;
-            margin-bottom: 35px;
-        }
-
-        .stat {
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid #1e293b;
-            border-radius: 14px;
-            padding: 20px;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .stat-label {
-            margin-top: 6px;
-            color: #94a3b8;
-            font-size: 13px;
-        }
-
-        /* Project information */
-
-        .info {
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid #1e293b;
-            border-radius: 16px;
-            padding: 25px;
-        }
-
-        .info h2 {
-            margin-top: 0;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 18px;
-        }
-
-        .info-item {
-            background: #0b1728;
-            padding: 15px;
-            border-radius: 10px;
-        }
-
-        .info-label {
-            color: #64748b;
-            font-size: 12px;
-            margin-bottom: 5px;
-        }
-
-        .info-value {
-            color: #e2e8f0;
-            font-size: 15px;
-        }
-
-        @media(max-width: 900px) {
-
-            .workflow {
-                overflow-x: auto;
-                justify-content: flex-start;
-                min-width: 850px;
-            }
-
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #fff !important; }
+            .print-card {
+                box-shadow: none !important;
+                border: 1px solid #d1d5db !important;
             }
         }
-
-        @media(max-width: 600px) {
-
-            .stats {
-                grid-template-columns: 1fr;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header h1 {
-                font-size: 25px;
-            }
-        }
-
-        .action-btn {
-    display: inline-block;
-    margin-top: 18px;
-    padding: 11px 18px;
-    border-radius: 9px;
-
-    background: #0369a1;
-    color: white;
-
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
-
-    border: 1px solid #38bdf8;
-
-    transition: 0.2s ease;
-}
-
-.action-btn:hover {
-    background: #0284c7;
-    transform: translateY(-2px);
-}
-
-.completed-message {
-    display: inline-block;
-    margin-top: 18px;
-    padding: 11px 18px;
-    border-radius: 9px;
-
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
-
-    border: 1px solid rgba(34, 197, 94, 0.4);
-
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.action-btn {
-    display: inline-block;
-    margin-top: 18px;
-    padding: 11px 18px;
-    border-radius: 9px;
-
-    background: #0369a1;
-    color: white;
-
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
-
-    border: 1px solid #38bdf8;
-    cursor: pointer;
-
-    transition: 0.2s ease;
-}
-
-.action-btn:hover {
-    background: #0284c7;
-    transform: translateY(-2px);
-}
-
-.workflow-steps {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin: 40px 0;
-}
-
-.workflow-step {
-    text-align: center;
-    min-width: 80px;
-}
-
-.step-circle {
-    width: 62px;
-    height: 62px;
-    margin: auto;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: #1e293b;
-    border: 2px solid #475569;
-
-    color: white;
-    font-size: 20px;
-    font-weight: 700;
-}
-
-.workflow-step.current .step-circle {
-    background: #0369a1;
-    border-color: #38bdf8;
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
-}
-
-.workflow-step.completed .step-circle {
-    background: #166534;
-    border-color: #22c55e;
-}
-
-.step-label {
-    margin-top: 12px;
-    color: #cbd5e1;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.step-line {
-    height: 3px;
-    flex: 1;
-    background: #334155;
-    min-width: 25px;
-}
     </style>
 </head>
 
-<body>
+<body class="bg-slate-50 text-slate-900">
 
-<div class="container">
+<!-- TOP NAV -->
+<header class="no-print bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-[1500px] mx-auto px-5 lg:px-8">
+        <div class="min-h-20 py-3 flex flex-wrap items-center justify-between gap-4">
 
-    <a href="{% url 'projects' %}" class="back">
-        ← Back to Projects
-    </a>
+            <a href="{% url 'home' %}" class="flex items-center gap-3 shrink-0">
+                <div class="w-11 h-11 rounded-xl bg-blue-700 text-white flex items-center justify-center shadow-sm">
+                    <span class="text-xl">🏛</span>
+                </div>
 
-    <div class="header">
+                <div>
+                    <div class="text-xs font-bold tracking-[0.18em] text-blue-700">NLAMS</div>
+                    <div class="text-lg font-bold text-slate-900 leading-tight">
+                        National Land Acquisition
+                    </div>
+                </div>
+            </a>
 
-        <h1>{{ project.project_name }}</h1>
+            <nav class="hidden xl:flex items-center gap-1">
+                <a href="{% url 'home' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Dashboard</a>
+                <a href="{% url 'projects' %}" class="px-3 py-2 rounded-lg bg-blue-50 text-blue-700 text-sm font-bold">Projects</a>
+                <a href="{% url 'land_map' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">GIS & Maps</a>
+                <a href="{% url 'compensation_list' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Compensation</a>
+                <a href="{% url 'rr_list' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">R&R</a>
+                <a href="{% url 'possession_list' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Possession</a>
+                <a href="{% url 'reports' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Reports</a>
+            </nav>
 
-        <p>
-            Automated Land Acquisition Workflow
-        </p>
+            <div class="flex items-center gap-2">
+                <button onclick="window.print()"
+                        class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50">
+                    🖨 Print
+                </button>
 
+                <a href="{% url 'projects' %}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50">
+                    ← Projects
+                </a>
+            </div>
+
+        </div>
     </div>
+</header>
+
+
+<main class="max-w-[1500px] mx-auto px-5 lg:px-8 py-8">
+
+    <!-- PAGE HEADER -->
+    <section class="mb-7">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+
+            <div>
+                <div class="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-blue-700 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                    Project Workflow
+                </div>
+
+                <h1 class="text-3xl lg:text-4xl font-bold tracking-tight text-slate-950">
+                    {{ project.project_name }}
+                </h1>
+
+                <p class="mt-2 text-slate-500">
+                    End-to-end land acquisition workflow and current project stage.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'project_progress' project.id %}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+                    📊 Project Progress
+                </a>
+
+                <a href="{% url 'project_detail' project.id %}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50">
+                    View Details
+                </a>
+            </div>
+
+        </div>
+    </section>
 
 
     <!-- CURRENT ACTION -->
+    <section class="print-card bg-white border border-blue-100 rounded-2xl shadow-sm overflow-hidden mb-7">
 
-    <div class="action-card">
+        <div class="h-1 bg-blue-700"></div>
 
-        <div class="action-label">
-            CURRENT WORKFLOW STAGE
+        <div class="p-6 lg:p-7">
+
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+
+                <div>
+                    <div class="text-xs font-bold tracking-widest uppercase text-blue-700">
+                        Current Workflow Stage
+                    </div>
+
+                    <h2 class="text-2xl lg:text-3xl font-bold text-slate-950 mt-2">
+                        {{ current_stage }}
+                    </h2>
+
+                    <p class="text-slate-600 mt-2">
+                        <span class="font-semibold text-slate-800">Next Action:</span>
+                        {{ next_action }}
+                    </p>
+                </div>
+
+
+                <div class="flex flex-wrap gap-3">
+
+                    {% if current_stage == 'LAND IDENTIFICATION' or current_stage == 'LAND VERIFICATION' %}
+
+                        <a href="{% url 'land_parcels' %}"
+                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+                            🔍 Review Land Parcels
+                        </a>
+
+                    {% elif current_stage == 'NOTIFICATION' %}
+
+                        <form method="POST" action="{% url 'workflow_action' project.id %}">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+                                📢 Issue Notification
+                            </button>
+                        </form>
+
+                    {% elif current_stage == 'COMPENSATION' %}
+
+                        <a href="{% url 'compensation_list' %}"
+                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+                            💰 Review Compensation
+                        </a>
+
+                    {% elif current_stage == 'ACQUISITION' %}
+
+                        <form method="POST" action="{% url 'workflow_action' project.id %}">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+                                ⚡ Complete Acquisition
+                            </button>
+                        </form>
+
+                    {% elif current_stage == 'R&R' %}
+
+                        <form method="POST" action="{% url 'complete_rr' project.id %}">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+                                🏠 Complete R&R
+                            </button>
+                        </form>
+
+                    {% elif current_stage == 'POSSESSION' %}
+
+                        <form method="POST" action="{% url 'complete_possession' project.id %}">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+                                📍 Take Possession
+                            </button>
+                        </form>
+
+                    {% elif current_stage == 'COMPLETED' %}
+
+                        <div class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm font-bold">
+                            ✓ All workflow stages completed
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
         </div>
 
-        <h2>
-            {{ current_stage }}
-        </h2>
-
-        <div class="next-action">
-    <strong>Next Action:</strong>
-    {{ next_action }}
-</div>
+    </section>
 
 
-{% if current_stage == 'LAND IDENTIFICATION' or current_stage == 'LAND VERIFICATION' %}
+    <!-- WORKFLOW TIMELINE -->
+    <section class="print-card bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mb-7">
 
-<a href="{% url 'land_parcels' %}" class="action-btn">
-    🔍 Review Land Parcels
-</a>
+        <div class="px-5 lg:px-7 py-5 border-b border-slate-200">
+            <p class="text-xs font-bold tracking-widest uppercase text-blue-700">
+                Acquisition Lifecycle
+            </p>
 
-{% elif current_stage == 'NOTIFICATION' %}
+            <h2 class="text-xl font-bold text-slate-950 mt-1">
+                Project Workflow
+            </h2>
 
-<form method="POST"
-      action="{% url 'workflow_action' project.id %}">
-    
-    {% csrf_token %}
-
-    <button type="submit" class="action-btn">
-        📢 Issue Notification
-    </button>
-
-</form>
+            <p class="text-sm text-slate-500 mt-1">
+                Track the project from initial identification through final possession.
+            </p>
+        </div>
 
 
+        <div class="workflow-scroll overflow-x-auto px-5 lg:px-8 py-8">
 
-{% elif current_stage == 'COMPENSATION' %}
+            <div class="flex items-start min-w-[1050px]">
 
-<a href="{% url 'compensation_list' %}" class="action-btn">
-    💰 Review Compensation
-</a>
+                <!-- PROJECT -->
+                <div class="flex-1 text-center">
+                    <div class="flex items-center">
+                        <div class="mx-auto w-12 h-12 rounded-full flex items-center justify-center font-bold
+                            {% if current_stage == 'LAND IDENTIFICATION' %}
+                                bg-blue-700 text-white ring-4 ring-blue-100
+                            {% else %}
+                                bg-emerald-600 text-white
+                            {% endif %}">
+                            1
+                        </div>
+                    </div>
+                    <div class="mt-3 text-xs font-bold text-slate-700">PROJECT</div>
+                    <div class="mt-1 text-[11px] text-slate-400">Identification</div>
+                </div>
 
-{% elif current_stage == 'ACQUISITION' %}
-
-<form method="POST"
-      action="{% url 'workflow_action' project.id %}">
-    {% csrf_token %}
-
-    <button type="submit" class="action-btn">
-        ⚡ Complete Acquisition
-    </button>
-</form>
-
-{% elif current_stage == 'R&R' %}
-
-<form method="POST"
-      action="{% url 'complete_rr' project.id %}">
-
-    {% csrf_token %}
-
-    <button type="submit" class="action-btn">
-        🏠 Complete R&R
-    </button>
-
-</form>
-
-{% elif current_stage == 'POSSESSION' %}
-
-<form method="POST"
-      action="{% url 'complete_possession' project.id %}">
-
-    {% csrf_token %}
-
-    <button type="submit" class="action-btn">
-        📍 Take Possession
-    </button>
-
-</form>
-
-{% elif current_stage == 'COMPLETED' %}
-
-<div class="completed-message">
-    ✓ All workflow stages completed
-</div>
-
-{% endif %}
+                <div class="w-10 h-1 mt-6 bg-slate-200"></div>
 
 
-    <!-- WORKFLOW -->
+                <!-- VERIFICATION -->
+                <div class="flex-1 text-center">
+                    <div class="w-12 h-12 mx-auto rounded-full flex items-center justify-center font-bold
+                        {% if current_stage == 'LAND VERIFICATION' %}
+                            bg-blue-700 text-white ring-4 ring-blue-100
+                        {% elif current_stage in 'NOTIFICATION,COMPENSATION,ACQUISITION,R&R,POSSESSION,COMPLETED' %}
+                            bg-emerald-600 text-white
+                        {% else %}
+                            bg-slate-100 text-slate-400 border border-slate-200
+                        {% endif %}">
+                        2
+                    </div>
+                    <div class="mt-3 text-xs font-bold text-slate-700">VERIFICATION</div>
+                    <div class="mt-1 text-[11px] text-slate-400">Land verification</div>
+                </div>
 
-    <div class="workflow-steps">
+                <div class="w-10 h-1 mt-6 bg-slate-200"></div>
 
-    <!-- PROJECT -->
-    <div class="workflow-step
-        {% if current_stage == 'LAND IDENTIFICATION' %}
-            current
-        {% else %}
-            completed
-        {% endif %}">
-        <div class="step-circle">1</div>
-        <div class="step-label">PROJECT</div>
-    </div>
 
-    <div class="step-line"></div>
+                <!-- NOTIFICATION -->
+                <div class="flex-1 text-center">
+                    <div class="w-12 h-12 mx-auto rounded-full flex items-center justify-center font-bold
+                        {% if current_stage == 'NOTIFICATION' %}
+                            bg-blue-700 text-white ring-4 ring-blue-100
+                        {% elif current_stage in 'COMPENSATION,ACQUISITION,R&R,POSSESSION,COMPLETED' %}
+                            bg-emerald-600 text-white
+                        {% else %}
+                            bg-slate-100 text-slate-400 border border-slate-200
+                        {% endif %}">
+                        3
+                    </div>
+                    <div class="mt-3 text-xs font-bold text-slate-700">NOTIFICATION</div>
+                    <div class="mt-1 text-[11px] text-slate-400">Formal notification</div>
+                </div>
 
-    <!-- VERIFICATION -->
-    <div class="workflow-step
-        {% if current_stage == 'LAND VERIFICATION' %}
-            current
-        {% elif current_stage in 'NOTIFICATION,COMPENSATION,ACQUISITION,R&R,POSSESSION,COMPLETED' %}
-            completed
-        {% endif %}">
-        <div class="step-circle">2</div>
-        <div class="step-label">VERIFICATION</div>
-    </div>
+                <div class="w-10 h-1 mt-6 bg-slate-200"></div>
 
-    <div class="step-line"></div>
 
-    <!-- NOTIFICATION -->
-    <div class="workflow-step
-        {% if current_stage == 'NOTIFICATION' %}
-            current
-        {% elif current_stage in 'COMPENSATION,ACQUISITION,R&R,POSSESSION,COMPLETED' %}
-            completed
-        {% endif %}">
-        <div class="step-circle">3</div>
-        <div class="step-label">NOTIFICATION</div>
-    </div>
+                <!-- COMPENSATION -->
+                <div class="flex-1 text-center">
+                    <div class="w-12 h-12 mx-auto rounded-full flex items-center justify-center font-bold
+                        {% if current_stage == 'COMPENSATION' %}
+                            bg-blue-700 text-white ring-4 ring-blue-100
+                        {% elif current_stage in 'ACQUISITION,R&R,POSSESSION,COMPLETED' %}
+                            bg-emerald-600 text-white
+                        {% else %}
+                            bg-slate-100 text-slate-400 border border-slate-200
+                        {% endif %}">
+                        4
+                    </div>
+                    <div class="mt-3 text-xs font-bold text-slate-700">COMPENSATION</div>
+                    <div class="mt-1 text-[11px] text-slate-400">Assessment & payment</div>
+                </div>
 
-    <div class="step-line"></div>
+                <div class="w-10 h-1 mt-6 bg-slate-200"></div>
 
-    <!-- COMPENSATION -->
-    <div class="workflow-step
-        {% if current_stage == 'COMPENSATION' %}
-            current
-        {% elif current_stage in 'ACQUISITION,R&R,POSSESSION,COMPLETED' %}
-            completed
-        {% endif %}">
-        <div class="step-circle">4</div>
-        <div class="step-label">COMPENSATION</div>
-    </div>
 
-    <div class="step-line"></div>
+                <!-- ACQUISITION -->
+                <div class="flex-1 text-center">
+                    <div class="w-12 h-12 mx-auto rounded-full flex items-center justify-center font-bold
+                        {% if current_stage == 'ACQUISITION' %}
+                            bg-blue-700 text-white ring-4 ring-blue-100
+                        {% elif current_stage in 'R&R,POSSESSION,COMPLETED' %}
+                            bg-emerald-600 text-white
+                        {% else %}
+                            bg-slate-100 text-slate-400 border border-slate-200
+                        {% endif %}">
+                        5
+                    </div>
+                    <div class="mt-3 text-xs font-bold text-slate-700">ACQUISITION</div>
+                    <div class="mt-1 text-[11px] text-slate-400">Land acquisition</div>
+                </div>
 
-    <!-- ACQUISITION -->
-    <div class="workflow-step
-        {% if current_stage == 'ACQUISITION' %}
-            current
-        {% elif current_stage in 'R&R,POSSESSION,COMPLETED' %}
-            completed
-        {% endif %}">
-        <div class="step-circle">5</div>
-        <div class="step-label">ACQUISITION</div>
-    </div>
+                <div class="w-10 h-1 mt-6 bg-slate-200"></div>
 
-    <div class="step-line"></div>
 
-    <!-- R&R -->
-    <div class="workflow-step
-        {% if current_stage == 'R&R' %}
-            current
-        {% elif current_stage in 'POSSESSION,COMPLETED' %}
-            completed
-        {% endif %}">
-        <div class="step-circle">6</div>
-        <div class="step-label">R&R</div>
-    </div>
+                <!-- R&R -->
+                <div class="flex-1 text-center">
+                    <div class="w-12 h-12 mx-auto rounded-full flex items-center justify-center font-bold
+                        {% if current_stage == 'R&R' %}
+                            bg-blue-700 text-white ring-4 ring-blue-100
+                        {% elif current_stage in 'POSSESSION,COMPLETED' %}
+                            bg-emerald-600 text-white
+                        {% else %}
+                            bg-slate-100 text-slate-400 border border-slate-200
+                        {% endif %}">
+                        6
+                    </div>
+                    <div class="mt-3 text-xs font-bold text-slate-700">R&R</div>
+                    <div class="mt-1 text-[11px] text-slate-400">Rehabilitation</div>
+                </div>
 
-    <div class="step-line"></div>
+                <div class="w-10 h-1 mt-6 bg-slate-200"></div>
 
-    <!-- POSSESSION -->
-    <div class="workflow-step
-        {% if current_stage == 'POSSESSION' %}
-            current
-        {% elif current_stage == 'COMPLETED' %}
-            completed
-        {% endif %}">
-        <div class="step-circle">7</div>
-        <div class="step-label">POSSESSION</div>
-    </div>
 
-    <div class="step-line"></div>
+                <!-- POSSESSION -->
+                <div class="flex-1 text-center">
+                    <div class="w-12 h-12 mx-auto rounded-full flex items-center justify-center font-bold
+                        {% if current_stage == 'POSSESSION' %}
+                            bg-blue-700 text-white ring-4 ring-blue-100
+                        {% elif current_stage == 'COMPLETED' %}
+                            bg-emerald-600 text-white
+                        {% else %}
+                            bg-slate-100 text-slate-400 border border-slate-200
+                        {% endif %}">
+                        7
+                    </div>
+                    <div class="mt-3 text-xs font-bold text-slate-700">POSSESSION</div>
+                    <div class="mt-1 text-[11px] text-slate-400">Physical possession</div>
+                </div>
 
-    <!-- COMPLETED -->
-    <div class="workflow-step
-        {% if current_stage == 'COMPLETED' %}
-            current
-        {% endif %}">
-        <div class="step-circle">✓</div>
-        <div class="step-label">COMPLETED</div>
-    </div>
+                <div class="w-10 h-1 mt-6 bg-slate-200"></div>
 
-</div>
+
+                <!-- COMPLETED -->
+                <div class="flex-1 text-center">
+                    <div class="w-12 h-12 mx-auto rounded-full flex items-center justify-center font-bold
+                        {% if current_stage == 'COMPLETED' %}
+                            bg-emerald-600 text-white ring-4 ring-emerald-100
+                        {% else %}
+                            bg-slate-100 text-slate-400 border border-slate-200
+                        {% endif %}">
+                        ✓
+                    </div>
+                    <div class="mt-3 text-xs font-bold text-slate-700">COMPLETED</div>
+                    <div class="mt-1 text-[11px] text-slate-400">Lifecycle complete</div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="px-5 lg:px-7 pb-5 flex flex-wrap items-center gap-4 text-xs text-slate-500">
+            <span class="inline-flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-700"></span>
+                Current stage
+            </span>
+
+            <span class="inline-flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                Completed
+            </span>
+
+            <span class="inline-flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-200 border border-slate-300"></span>
+                Upcoming
+            </span>
+        </div>
+
+    </section>
 
 
     <!-- PARCEL STATISTICS -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-7">
 
-    <div class="stats">
-
-        <div class="stat">
-            <div class="stat-value">
-                {{ total_parcels }}
-            </div>
-
-            <div class="stat-label">
-                Total Parcels
-            </div>
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Total Parcels</p>
+            <p class="text-3xl font-bold text-slate-950 mt-3">{{ total_parcels }}</p>
+            <p class="text-xs text-slate-500 mt-1">Registered in project</p>
         </div>
 
-
-        <div class="stat">
-            <div class="stat-value">
-                {{ verified_parcels }}
-            </div>
-
-            <div class="stat-label">
-                Verified
-            </div>
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Verified</p>
+            <p class="text-3xl font-bold text-blue-700 mt-3">{{ verified_parcels }}</p>
+            <p class="text-xs text-slate-500 mt-1">Land verified</p>
         </div>
 
-
-        <div class="stat">
-            <div class="stat-value">
-                {{ notified_parcels }}
-            </div>
-
-            <div class="stat-label">
-                Notified
-            </div>
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Notified</p>
+            <p class="text-3xl font-bold text-amber-700 mt-3">{{ notified_parcels }}</p>
+            <p class="text-xs text-slate-500 mt-1">Notification stage</p>
         </div>
 
-
-        <div class="stat">
-            <div class="stat-value">
-                {{ acquired_parcels }}
-            </div>
-
-            <div class="stat-label">
-                Acquired
-            </div>
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Acquired</p>
+            <p class="text-3xl font-bold text-indigo-700 mt-3">{{ acquired_parcels }}</p>
+            <p class="text-xs text-slate-500 mt-1">Acquisition completed</p>
         </div>
 
-
-        <div class="stat">
-            <div class="stat-value">
-                {{ possession_parcels }}
-            </div>
-
-            <div class="stat-label">
-                Possession
-            </div>
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Possession</p>
+            <p class="text-3xl font-bold text-emerald-700 mt-3">{{ possession_parcels }}</p>
+            <p class="text-xs text-slate-500 mt-1">Possession recorded</p>
         </div>
 
-    </div>
+    </section>
 
 
     <!-- PROJECT INFORMATION -->
+    <section class="print-card bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
 
-    <div class="info">
+        <div class="px-5 lg:px-7 py-5 border-b border-slate-200">
+            <p class="text-xs font-bold tracking-widest uppercase text-blue-700">
+                Project Information
+            </p>
 
-        <h2>
-            Project Information
-        </h2>
+            <h2 class="text-xl font-bold text-slate-950 mt-1">
+                Project Overview
+            </h2>
+        </div>
 
-        <div class="info-grid">
 
-            <div class="info-item">
+        <div class="p-5 lg:p-7 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-                <div class="info-label">
-                    PROJECT TYPE
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <div class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Project Type
                 </div>
-
-                <div class="info-value">
+                <div class="text-sm font-semibold text-slate-800 mt-2">
                     {{ project.project_type }}
                 </div>
-
             </div>
 
-
-            <div class="info-item">
-
-                <div class="info-label">
-                    LOCATION
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <div class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Location
                 </div>
-
-                <div class="info-value">
+                <div class="text-sm font-semibold text-slate-800 mt-2">
                     {{ project.district }}, {{ project.state }}
                 </div>
-
             </div>
 
-
-            <div class="info-item">
-
-                <div class="info-label">
-                    LAND REQUIRED
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <div class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Land Required
                 </div>
-
-                <div class="info-value">
+                <div class="text-sm font-semibold text-slate-800 mt-2">
                     {{ project.land_required }} Acres
                 </div>
-
             </div>
 
-
-            <div class="info-item">
-
-                <div class="info-label">
-                    PROJECT STATUS
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <div class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Project Status
                 </div>
-
-                <div class="info-value">
+                <div class="text-sm font-semibold text-slate-800 mt-2">
                     {{ project.get_status_display }}
                 </div>
-
             </div>
 
         </div>
 
-    </div>
+    </section>
 
-</div>
+
+    <!-- FOOTER ACTIONS -->
+    <section class="no-print mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+        <a href="{% url 'projects' %}"
+           class="text-sm font-semibold text-blue-700 hover:text-blue-900">
+            ← Back to Projects
+        </a>
+
+        <div class="flex flex-wrap gap-2">
+
+            <a href="{% url 'land_map' %}?project={{ project.id }}"
+               class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                🗺 Open Project GIS
+            </a>
+
+            <a href="{% url 'project_progress' project.id %}"
+               class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                📊 View Progress
+            </a>
+
+            <button onclick="window.print()"
+                    class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                🖨 Print Workflow
+            </button>
+
+        </div>
+
+    </section>
+
+</main>
 
 </body>
 </html>

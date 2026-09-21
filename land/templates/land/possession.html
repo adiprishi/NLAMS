@@ -1,359 +1,286 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Possession Tracking | NLAMS</title>
 
-    <title>Possession Tracking | NLAMS</title>
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #07111f;
-            color: #e5e7eb;
-        }
-
-        .container {
-            max-width: 1250px;
-            margin: auto;
-            padding: 35px 25px;
-        }
-
-        /* HEADER */
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            gap: 20px;
-        }
-
-        .title-section h1 {
-            margin: 0;
-            font-size: 30px;
-            color: #ffffff;
-        }
-
-        .title-section p {
-            margin-top: 8px;
-            color: #94a3b8;
-            font-size: 14px;
-        }
-
-        .btn {
-            background: #2563eb;
-            color: white;
-            padding: 12px 18px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: 0.2s;
-            white-space: nowrap;
-        }
-
-        .btn:hover {
-            background: #1d4ed8;
-        }
-
-        /* STATS */
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-            margin-bottom: 25px;
-        }
-
-        .stat-card {
-            background: #0d1b2a;
-            border: 1px solid #1e334b;
-            border-radius: 12px;
-            padding: 20px;
-        }
-
-        .stat-label {
-            color: #94a3b8;
-            font-size: 13px;
-            margin-bottom: 8px;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: bold;
-            color: #ffffff;
-        }
-
-        /* TABLE */
-
-        .table-card {
-            background: #0d1b2a;
-            border: 1px solid #1e334b;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .table-header {
-            padding: 20px 22px;
-            border-bottom: 1px solid #1e334b;
-        }
-
-        .table-header h2 {
-            margin: 0;
-            font-size: 18px;
-            color: #ffffff;
-        }
-
-        .table-header p {
-            margin: 6px 0 0;
-            color: #64748b;
-            font-size: 13px;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 900px;
-        }
-
-        th {
-            padding: 15px;
-            text-align: left;
-            background: #111f31;
-            color: #94a3b8;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        td {
-            padding: 16px 15px;
-            border-bottom: 1px solid #1a2b40;
-            color: #dbe4ee;
-            font-size: 14px;
-        }
-
-        tr:hover td {
-            background: #102235;
-        }
-
-        .parcel-id {
-            color: #60a5fa;
-            font-weight: bold;
-        }
-
-        .owner {
-            color: #ffffff;
-            font-weight: 500;
-        }
-
-        .project {
-            color: #cbd5e1;
-        }
-
-        .date {
-            color: #94a3b8;
-        }
-
-        .remarks {
-            color: #94a3b8;
-            max-width: 260px;
-        }
-
-        /* STATUS */
-
-        .status {
-            display: inline-block;
-            padding: 6px 11px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .taken {
-            background: rgba(34, 197, 94, 0.15);
-            color: #4ade80;
-            border: 1px solid rgba(34, 197, 94, 0.25);
-        }
-
-        .progress {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.25);
-        }
-
-        .pending {
-            background: rgba(239, 68, 68, 0.15);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.25);
-        }
-
-        /* EMPTY */
-
-        .empty {
-            text-align: center;
-            padding: 50px !important;
-            color: #64748b;
-        }
-
-        /* BACK */
-
-        .back {
-            display: inline-block;
-            margin-top: 22px;
-            color: #60a5fa;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-        .back:hover {
-            color: #93c5fd;
-        }
-
-        /* RESPONSIVE */
-
-        @media (max-width: 800px) {
-
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .stats {
-                grid-template-columns: 1fr;
-            }
-
-            .container {
-                padding: 25px 15px;
-            }
-
-            .title-section h1 {
-                font-size: 25px;
-            }
-        }
-    </style>
+<style>
+@media print {
+    .no-print { display:none !important; }
+    body { background:#fff !important; }
+    .print-card { box-shadow:none !important; border:1px solid #d1d5db !important; }
+}
+</style>
 </head>
 
-<body>
+<body class="bg-slate-50 text-slate-900">
 
-<div class="container">
+<!-- TOP NAV -->
+<header class="no-print bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-[1500px] mx-auto px-5 lg:px-8">
+        <div class="h-20 flex items-center justify-between gap-6">
 
-    <!-- HEADER -->
+            <a href="{% url 'home' %}" class="flex items-center gap-3 shrink-0">
+                <div class="w-11 h-11 rounded-xl bg-blue-700 text-white flex items-center justify-center shadow-sm">
+                    <span class="text-xl">🏛</span>
+                </div>
 
-    <div class="header">
+                <div>
+                    <div class="text-xs font-bold tracking-[0.18em] text-blue-700">NLAMS</div>
+                    <div class="text-lg font-bold text-slate-900 leading-tight">
+                        National Land Acquisition
+                    </div>
+                </div>
+            </a>
 
-        <div class="title-section">
-            <h1>📍 Possession Tracking</h1>
-            <p>Monitor land possession and handover status across acquisition projects.</p>
+            <nav class="hidden xl:flex items-center gap-1">
+                <a href="{% url 'home' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Dashboard</a>
+                <a href="{% url 'projects' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Projects</a>
+                <a href="{% url 'land_map' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">GIS & Maps</a>
+                <a href="{% url 'compensation_list' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Compensation</a>
+                <a href="{% url 'rr_list' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">R&R</a>
+                <a href="{% url 'possession_list' %}" class="px-3 py-2 rounded-lg bg-blue-50 text-blue-700 text-sm font-bold">Possession</a>
+                <a href="{% url 'reports' %}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700">Reports</a>
+            </nav>
+
+            <div class="flex items-center gap-2">
+                <button onclick="window.print()" class="no-print hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50">
+                    🖨 Print
+                </button>
+
+                <a href="{% url 'create_possession' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+                    <span>+</span>
+                    Add Possession
+                </a>
+            </div>
         </div>
-
-        <a href="{% url 'create_possession' %}" class="btn">
-            + Add Possession
-        </a>
-
     </div>
+</header>
+
+
+<main class="max-w-[1500px] mx-auto px-5 lg:px-8 py-8">
+
+    <!-- PAGE HEADER -->
+    <section class="mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+
+            <div>
+                <div class="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-blue-700 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                    Land Handover & Monitoring
+                </div>
+
+                <h1 class="text-3xl lg:text-4xl font-bold tracking-tight text-slate-950">
+                    Possession Tracking
+                </h1>
+
+                <p class="mt-2 text-slate-500 max-w-2xl">
+                    Monitor land possession, parcel handover dates and project-level
+                    possession progress across acquisition records.
+                </p>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-500">
+                <span class="font-semibold text-slate-800">NLAMS</span>
+                · Possession Monitoring
+            </div>
+
+        </div>
+    </section>
 
 
     <!-- STATS -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
 
-    <div class="stats">
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Total Records
+                </p>
+                <span class="w-9 h-9 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
+                    📍
+                </span>
+            </div>
 
-        <div class="stat-card">
-            <div class="stat-label">TOTAL RECORDS</div>
-            <div class="stat-value">{{ possessions|length }}</div>
+            <p class="text-3xl font-bold text-slate-950 mt-4">
+                {{ possessions|length }}
+            </p>
+
+            <p class="text-xs text-slate-500 mt-1">
+                Possession records in the system
+            </p>
         </div>
 
-        <div class="stat-card">
-            <div class="stat-label">POSSESSION TAKEN</div>
-            <div class="stat-value">
+
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Possession Taken
+                </p>
+                <span class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                    ✓
+                </span>
+            </div>
+
+            <p class="text-3xl font-bold text-emerald-700 mt-4">
                 {{ taken_count|default:"0" }}
-            </div>
+            </p>
+
+            <p class="text-xs text-slate-500 mt-1">
+                Handover completed
+            </p>
         </div>
 
-        <div class="stat-card">
-            <div class="stat-label">PENDING / IN PROGRESS</div>
-            <div class="stat-value">
+
+        <div class="print-card bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <p class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Pending / In Progress
+                </p>
+                <span class="w-9 h-9 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
+                    ◷
+                </span>
+            </div>
+
+            <p class="text-3xl font-bold text-amber-700 mt-4">
                 {{ pending_count|default:"0" }}
-            </div>
+            </p>
+
+            <p class="text-xs text-slate-500 mt-1">
+                Records requiring follow-up
+            </p>
         </div>
 
-    </div>
+    </section>
 
 
     <!-- TABLE -->
+    <section class="print-card bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
 
-    <div class="table-card">
+        <div class="px-5 py-5 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
 
-        <div class="table-header">
-            <h2>Possession Records</h2>
-            <p>Track possession status, dates and parcel-level handover information.</p>
+            <div>
+                <p class="text-xs font-bold uppercase tracking-widest text-blue-700">
+                    Possession Register
+                </p>
+
+                <h2 class="text-xl font-bold text-slate-950 mt-1">
+                    Possession Records
+                </h2>
+
+                <p class="text-sm text-slate-500 mt-1">
+                    Parcel-level handover status, dates and remarks.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2 text-xs">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    Taken
+                </span>
+
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 font-semibold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    In Progress
+                </span>
+
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 text-red-700 font-semibold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                    Pending
+                </span>
+            </div>
+
         </div>
 
-        <div class="table-wrapper">
 
-            <table>
+        <div class="overflow-x-auto">
 
-                <thead>
+            <table class="w-full text-sm min-w-[950px]">
+
+                <thead class="bg-slate-50 border-b border-slate-200">
+
                     <tr>
-                        <th>Parcel ID</th>
-                        <th>Owner</th>
-                        <th>Project</th>
-                        <th>Status</th>
-                        <th>Possession Date</th>
-                        <th>Remarks</th>
+
+                        <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                            Parcel ID
+                        </th>
+
+                        <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                            Owner
+                        </th>
+
+                        <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                            Project
+                        </th>
+
+                        <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                            Status
+                        </th>
+
+                        <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                            Possession Date
+                        </th>
+
+                        <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                            Remarks
+                        </th>
+
                     </tr>
+
                 </thead>
 
-                <tbody>
+
+                <tbody class="divide-y divide-slate-100">
 
                 {% for possession in possessions %}
 
-                    <tr>
+                    <tr class="hover:bg-slate-50 transition">
 
-                        <td>
-                            <span class="parcel-id">
+                        <td class="px-5 py-4">
+                            <a href="{% url 'land_intelligence' %}?parcel={{ possession.parcel.parcel_id }}"
+                               class="font-bold text-blue-700 hover:text-blue-900 hover:underline">
                                 {{ possession.parcel.parcel_id }}
-                            </span>
+                            </a>
                         </td>
 
-                        <td>
-                            <span class="owner">
+
+                        <td class="px-5 py-4">
+                            <span class="font-semibold text-slate-800">
                                 {{ possession.parcel.owner_name }}
                             </span>
                         </td>
 
-                        <td>
-                            <span class="project">
+
+                        <td class="px-5 py-4">
+                            <span class="text-slate-600">
                                 {{ possession.parcel.project.project_name }}
                             </span>
                         </td>
 
-                        <td>
+
+                        <td class="px-5 py-4">
 
                             {% if possession.possession_status == 'TAKEN' %}
 
-                                <span class="status taken">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-xs font-bold">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                     Possession Taken
                                 </span>
 
                             {% elif possession.possession_status == 'IN_PROGRESS' %}
 
-                                <span class="status progress">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100 text-xs font-bold">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                                     In Progress
                                 </span>
 
                             {% else %}
 
-                                <span class="status pending">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 text-red-700 border border-red-100 text-xs font-bold">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
                                     Pending
                                 </span>
 
@@ -361,16 +288,14 @@
 
                         </td>
 
-                        <td>
-                            <span class="date">
-                                {{ possession.possession_date|default:"-" }}
-                            </span>
+
+                        <td class="px-5 py-4 text-slate-600">
+                            {{ possession.possession_date|default:"—" }}
                         </td>
 
-                        <td>
-                            <span class="remarks">
-                                {{ possession.remarks|default:"-" }}
-                            </span>
+
+                        <td class="px-5 py-4 text-slate-500 max-w-xs">
+                            {{ possession.remarks|default:"—" }}
                         </td>
 
                     </tr>
@@ -378,8 +303,25 @@
                 {% empty %}
 
                     <tr>
-                        <td colspan="6" class="empty">
-                            No possession records found.
+                        <td colspan="6" class="px-5 py-14 text-center">
+
+                            <div class="w-14 h-14 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center text-2xl">
+                                📍
+                            </div>
+
+                            <h3 class="font-bold text-slate-800 mt-4">
+                                No possession records
+                            </h3>
+
+                            <p class="text-sm text-slate-500 mt-1">
+                                No possession information has been added yet.
+                            </p>
+
+                            <a href="{% url 'create_possession' %}"
+                               class="inline-flex mt-4 px-4 py-2 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800">
+                                + Add Possession
+                            </a>
+
                         </td>
                     </tr>
 
@@ -391,14 +333,34 @@
 
         </div>
 
-    </div>
+    </section>
 
 
-    <a href="{% url 'home' %}" class="back">
-        ← Back to Dashboard
-    </a>
+    <!-- FOOTER ACTIONS -->
+    <section class="no-print mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 
-</div>
+        <a href="{% url 'home' %}"
+           class="text-sm font-semibold text-blue-700 hover:text-blue-900">
+            ← Back to Dashboard
+        </a>
+
+        <div class="flex gap-2">
+
+            <a href="{% url 'land_map' %}"
+               class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                Open GIS Map
+            </a>
+
+            <a href="{% url 'reports' %}"
+               class="px-4 py-2 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                View Reports
+            </a>
+
+        </div>
+
+    </section>
+
+</main>
 
 </body>
 </html>

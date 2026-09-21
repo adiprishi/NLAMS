@@ -5,3 +5,12 @@ db.sqlite3
 .env
 .vscode/
 *.log
+# User-generated media
+media/
+
+# Local database backups
+db_sqlite_backup_before_postgres.sqlite3
+
+# Local migration/data export files
+nlams_data_only.json
+nlams_main_data.json

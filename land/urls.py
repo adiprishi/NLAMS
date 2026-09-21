@@ -4,7 +4,9 @@ from . import views
 urlpatterns = [
     path('', views.home, name='home'),
 
-    path('login/', views.login_page, name='login'),
+    path('land-intelligence/', views.land_intelligence, name='land_intelligence'),
+
+    path('login/', views.login_page, name='login_page'),
 
     path('supabase-login/', views.supabase_login, name='supabase_login'),
 
@@ -17,6 +19,9 @@ urlpatterns = [
     path('projects/<int:project_id>/', views.project_detail, name='project_detail'),
 
     path('reports/', views.reports, name='reports'),
+    path('search/', views.search, name='search'),
+    path('officer-login/', views.officer_login, name='officer_login'),
+path('officer-logout/', views.officer_logout, name='officer_logout'),
 
     path(
     'projects/<int:project_id>/workflow/',
@@ -28,6 +33,12 @@ path(
     'projects/<int:project_id>/workflow/rr/',
     views.complete_rr,
     name='complete_rr'
+),
+
+path(
+    'projects/<int:project_id>/progress/',
+    views.project_progress,
+    name='project_progress'
 ),
 
 path(
@@ -91,5 +102,25 @@ path(
         name='create_possession'
     ),
 
+path(
+    'text-to-speech/',
+    views.text_to_speech,
+    name='text_to_speech'
+),
+path(
+    'projects/<int:project_id>/photos/',
+    views.site_photos,
+    name='site_photos'
+),
+path(
+    'site-photos/<int:photo_id>/delete/',
+    views.delete_site_photo,
+    name='delete_site_photo'
+),
+path(
+    'audit-logs/',
+    views.audit_logs,
+    name='audit_logs'
+),
     
 ]
