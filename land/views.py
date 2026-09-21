@@ -743,7 +743,7 @@ def home(request):
     # SEND DATA TO DASHBOARD
     # =========================
 
-    return render(request, 'dashboard_gemini.html', {
+    return render(request, 'land/dashboard_gemini.html', {
 
 
 
