@@ -25,13 +25,22 @@ ELEVENLABS_API_KEY = os.getenv('ELEVENLABS_API_KEY')
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-dwrr0ew2g)0u6mmhz_o+sxd-xq$m3w)k=uj*)1utp5fj7ek6$9'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    ".vercel.app",
+]
 
+
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
 
 # Application definition
 
@@ -125,22 +134,31 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
 
 LOGIN_URL = '/login/'
 
-GDAL_LIBRARY_PATH = r"C:\Program Files\PostgreSQL\18\bin\libgdal-35.dll"
-GEOS_LIBRARY_PATH = r"C:\Program Files\PostgreSQL\18\bin\libgeos_c.dll"
-PROJ_DATA = r"C:\Program Files\PostgreSQL\18\share\contrib\postgis-3.6\proj"
+# --------------------------------------------------
+# WINDOWS GIS LIBRARIES
+# --------------------------------------------------
+
+if os.name == "nt":
+    GDAL_LIBRARY_PATH = (
+        r"C:\Program Files\PostgreSQL\18\bin\libgdal-35.dll"
+    )
+
+    GEOS_LIBRARY_PATH = (
+        r"C:\Program Files\PostgreSQL\18\bin\libgeos_c.dll"
+    )
+
+    PROJ_DATA = (
+        r"C:\Program Files\PostgreSQL\18\share\contrib\postgis-3.6\proj"
+    )
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
