@@ -3,7 +3,7 @@
 > **Web-based platform for transparent, GIS-enabled land acquisition
 > management**
 
-**Smart India Hackathon 2026 · Team BhoomiSetu**
+**Smart India Hackathon 2026 · Team TERRASYNCC**
 
 NLAMS is a Django-based prototype designed to digitize and centralize
 the land acquisition lifecycle --- from project proposal and land
