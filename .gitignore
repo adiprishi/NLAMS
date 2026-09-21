@@ -8,6 +8,8 @@ db.sqlite3
 # User-generated media
 media/
 
+~$*
+
 # Local database backups
 db_sqlite_backup_before_postgres.sqlite3
 
