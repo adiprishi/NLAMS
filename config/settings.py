@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+import platform
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -148,17 +149,9 @@ LOGIN_URL = '/login/'
 # WINDOWS GIS LIBRARIES
 # --------------------------------------------------
 
-if os.name == "nt":
-    GDAL_LIBRARY_PATH = (
-        r"C:\Program Files\PostgreSQL\18\bin\libgdal-35.dll"
-    )
-
-    GEOS_LIBRARY_PATH = (
-        r"C:\Program Files\PostgreSQL\18\bin\libgeos_c.dll"
-    )
-
-    PROJ_DATA = (
-        r"C:\Program Files\PostgreSQL\18\share\contrib\postgis-3.6\proj"
-    )
+if platform.system() == "Windows":
+    GDAL_LIBRARY_PATH = r"C:\Program Files\PostgreSQL\18\bin\libgdal-35.dll"
+    GEOS_LIBRARY_PATH = r"C:\Program Files\PostgreSQL\18\bin\libgeos_c.dll"
+    PROJ_DATA = r"C:\Program Files\PostgreSQL\18\share\contrib\postgis-3.6\proj"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
