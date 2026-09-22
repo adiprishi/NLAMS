@@ -4,3 +4,4 @@ python-dotenv==1.2.3
 PyJWT==2.13.0
 elevenlabs==2.67.0
 gunicorn==23.0.0
+cryptography==50.0.1
