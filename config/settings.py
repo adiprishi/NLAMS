@@ -34,8 +34,14 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    ".vercel.app",
 ]
+
+if os.getenv("RENDER_EXTERNAL_HOSTNAME"):
+    ALLOWED_HOSTS.append(os.getenv("RENDER_EXTERNAL_HOSTNAME"))
+
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}"
+] if os.getenv("RENDER_EXTERNAL_HOSTNAME") else []
 
 
 if not DEBUG:
