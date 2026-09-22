@@ -26,22 +26,16 @@ ELEVENLABS_API_KEY = os.getenv('ELEVENLABS_API_KEY')
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+DEBUG = True
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-]
-
-if os.getenv("RENDER_EXTERNAL_HOSTNAME"):
-    ALLOWED_HOSTS.append(os.getenv("RENDER_EXTERNAL_HOSTNAME"))
+ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
-    f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}"
-] if os.getenv("RENDER_EXTERNAL_HOSTNAME") else []
+    "https://nlams.onrender.com",
+]
 
 
 if not DEBUG:
