@@ -1711,11 +1711,7 @@ def supabase_login(request):
             status=401
         )
 
-    except Exception as e:
-        print("=== SUPABASE LOGIN ERROR ===")
-        print("ERROR TYPE:", type(e).__name__)
-        print("ERROR:", str(e))
-
+    except Exception:
         return JsonResponse(
             {'error': 'Authentication verification failed'},
             status=401
