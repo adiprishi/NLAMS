@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404  # type: ignore[import-not-found]
 from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import Point, Polygon
 from django.contrib.auth.decorators import login_required  # type: ignore[import-not-found]
 from django.http import JsonResponse, HttpResponse  # type: ignore[import-not-found]
 from django.contrib.auth import login, logout  # type: ignore[import-not-found]
 from django.contrib.auth.models import User  # type: ignore[import-not-found]
+from .utils import log_audit
 from .models import (
     Project,
     LandParcel,
@@ -833,7 +835,7 @@ def projects(request):
 
 def project_workflow(request, project_id):
 
-    project = Project.objects.get(id=project_id)
+    project = get_object_or_404(Project, id=project_id)
 
     parcels = project.parcels.all()
 
@@ -841,15 +843,27 @@ def project_workflow(request, project_id):
 
     # LAND WORKFLOW
     verified_parcels = parcels.filter(
-        status__in=['VERIFIED', 'NOTIFIED', 'ACQUIRED', 'POSSESSION']
+        status__in=[
+            'VERIFIED',
+            'NOTIFIED',
+            'ACQUIRED',
+            'POSSESSION'
+        ]
     ).count()
 
     notified_parcels = parcels.filter(
-        status__in=['NOTIFIED', 'ACQUIRED', 'POSSESSION']
+        status__in=[
+            'NOTIFIED',
+            'ACQUIRED',
+            'POSSESSION'
+        ]
     ).count()
 
     acquired_parcels = parcels.filter(
-        status__in=['ACQUIRED', 'POSSESSION']
+        status__in=[
+            'ACQUIRED',
+            'POSSESSION'
+        ]
     ).count()
 
     possession_parcels = parcels.filter(
@@ -868,7 +882,9 @@ def project_workflow(request, project_id):
     ).count()
 
     # R&R
-    rr_cases = RRCase.objects.filter(project=project)
+    rr_cases = RRCase.objects.filter(
+        project=project
+    )
 
     total_rr = rr_cases.count()
 
@@ -888,7 +904,6 @@ def project_workflow(request, project_id):
     ).count()
 
     # AUTOMATIC WORKFLOW
-
     if total_parcels == 0:
 
         current_stage = "LAND IDENTIFICATION"
@@ -907,29 +922,39 @@ def project_workflow(request, project_id):
     elif total_compensation == 0 or paid_compensation < total_compensation:
 
         current_stage = "COMPENSATION"
-        next_action = "Complete compensation assessment and payment."
+        next_action = (
+            "Complete compensation assessment and payment."
+        )
 
     elif acquired_parcels < total_parcels:
 
         current_stage = "ACQUISITION"
-        next_action = "Complete acquisition of all notified parcels."
+        next_action = (
+            "Complete acquisition of all notified parcels."
+        )
 
     elif total_rr == 0 or completed_rr < total_rr:
 
         current_stage = "R&R"
-        next_action = "Complete rehabilitation and resettlement activities."
+        next_action = (
+            "Complete rehabilitation and resettlement activities."
+        )
 
     elif possession_parcels < total_parcels:
 
         current_stage = "POSSESSION"
-        next_action = "Complete possession of all acquired land parcels."
+        next_action = (
+            "Complete possession of all acquired land parcels."
+        )
 
     else:
 
         current_stage = "COMPLETED"
-        next_action = "All acquisition workflow stages are completed."
+        next_action = (
+            "All acquisition workflow stages are completed."
+        )
 
-        # -----------------------------------------
+    # -----------------------------------------
     # ATTENTION REQUIRED
     # -----------------------------------------
 
@@ -953,7 +978,6 @@ def project_workflow(request, project_id):
                 ),
                 'severity': 'High'
             })
-
 
     # Check possession
     for possession in possession_records:
@@ -979,7 +1003,6 @@ def project_workflow(request, project_id):
                 'severity': 'High'
             })
 
-
     # Check R&R
     for rr in rr_cases:
 
@@ -1003,6 +1026,35 @@ def project_workflow(request, project_id):
                 'severity': 'Medium'
             })
 
+    # -----------------------------------------
+    # DISPLAY STATUS
+    # -----------------------------------------
+    #
+    # IMPORTANT:
+    # This is calculated for display only.
+    # We DO NOT save it to the database here.
+    #
+
+    if current_stage == "COMPLETED":
+
+        workflow_status = "COMPLETED"
+
+    elif current_stage in [
+        "COMPENSATION",
+        "ACQUISITION",
+        "R&R",
+        "POSSESSION"
+    ]:
+
+        workflow_status = "ACQUISITION"
+
+    elif current_stage == "LAND VERIFICATION":
+
+        workflow_status = "UNDER_REVIEW"
+
+    else:
+
+        workflow_status = "SUBMITTED"
 
     context = {
         'project': project,
@@ -1026,27 +1078,10 @@ def project_workflow(request, project_id):
         'current_stage': current_stage,
         'next_action': next_action,
         'attention_items': attention_items,
+
+        # Calculated display status.
+        'workflow_status': workflow_status,
     }
-
-    # Synchronize project status with workflow
-    if current_stage == "COMPLETED":
-        project.status = "COMPLETED"
-
-    elif current_stage in [
-        "COMPENSATION",
-        "ACQUISITION",
-        "R&R",
-        "POSSESSION"
-    ]:
-        project.status = "ACQUISITION"
-
-    elif current_stage == "LAND VERIFICATION":
-        project.status = "UNDER_REVIEW"
-
-    else:
-        project.status = "SUBMITTED"
-
-    project.save()
 
     return render(
         request,
@@ -1057,7 +1092,10 @@ def project_workflow(request, project_id):
 @login_required
 def workflow_action(request, project_id):
 
-    project = Project.objects.get(id=project_id)
+    project = get_object_or_404(
+        Project,
+        id=project_id
+    )
 
     if request.method != 'POST':
         return redirect(
@@ -1067,177 +1105,141 @@ def workflow_action(request, project_id):
 
     parcels = project.parcels.all()
 
-    # VERIFICATION → NOTIFICATION
+    # -------------------------------------------------
+    # VERIFIED → NOTIFIED
+    # -------------------------------------------------
+
     verified_pending = parcels.filter(
         status='VERIFIED'
     )
 
-    for parcel in verified_pending:
-        parcel.status = 'NOTIFIED'
-        parcel.save()
+    if verified_pending.exists():
 
-    # NOTIFICATION → ACQUISITION
-    notified_pending = parcels.filter(
-        status='NOTIFIED'
-    )
+        for parcel in verified_pending:
 
-    for parcel in notified_pending:
-        parcel.status = 'ACQUIRED'
-        parcel.save()
+            old_status = parcel.status
+
+            parcel.status = 'NOTIFIED'
+
+            parcel.save(
+                update_fields=['status']
+            )
+
+            log_audit(
+                user=request.user,
+                action='UPDATE',
+                instance=parcel,
+                description=(
+                    f'Changed parcel status from '
+                    f'"{old_status}" to "NOTIFIED" '
+                    f'for parcel "{parcel.parcel_id}" '
+                    f'in project "{project.project_name}".'
+                )
+            )
+
+        return redirect(
+            'project_workflow',
+            project_id=project.id
+        )
+
+    # -------------------------------------------------
+    # NOTIFIED → ACQUIRED
+    # -------------------------------------------------
+
+    notified_pending = parcels.filter(status='NOTIFIED')
+    if notified_pending.exists():
+        for parcel in notified_pending:
+            old_status = parcel.status
+            parcel.status = 'ACQUIRED'
+            parcel.save(update_fields=['status'])
+
+            log_audit(
+                user=request.user,
+                action='STATUS_CHANGE',
+                instance=parcel,
+                description=(
+                    f'Changed parcel status from "{old_status}" to "ACQUIRED" '
+                    f'for parcel "{parcel.parcel_id}" in project "{project.project_name}".'
+                )
+            )
+
+        # Update the project stage when acquisition is reached
+        old_project_status = project.status
+        if old_project_status != 'ACQUISITION':
+            project.status = 'ACQUISITION'
+            project.save(update_fields=['status'])
+
+            log_audit(
+                user=request.user,
+                action='STATUS_CHANGE',
+                instance=project,
+                description=(
+                    f'Project "{project.project_name}" status changed from '
+                    f'"{old_project_status}" to "ACQUISITION" after land parcels '
+                    f'were acquired.'
+                )
+            )
+
+        return redirect('project_workflow', project_id=project.id)
+    # -------------------------------------------------
+    # Nothing to advance
+    # -------------------------------------------------
 
     return redirect(
         'project_workflow',
         project_id=project.id
     )
 
-    # -------------------------
-    # LAND WORKFLOW
-    # -------------------------
+@login_required
+def complete_rr(request, project_id):
 
-    verified_parcels = parcels.filter(
-        status__in=['VERIFIED', 'NOTIFIED', 'ACQUIRED', 'POSSESSION']
-    ).count()
-
-    notified_parcels = parcels.filter(
-        status__in=['NOTIFIED', 'ACQUIRED', 'POSSESSION']
-    ).count()
-
-    acquired_parcels = parcels.filter(
-        status__in=['ACQUIRED', 'POSSESSION']
-    ).count()
-
-    possession_parcels = parcels.filter(
-        status='POSSESSION'
-    ).count()
-
-
-    # -------------------------
-    # COMPENSATION
-    # -------------------------
-
-    compensation_records = Compensation.objects.filter(
-        parcel__project=project
+    project = get_object_or_404(
+        Project,
+        id=project_id
     )
 
-    total_compensation = compensation_records.count()
-
-    paid_compensation = compensation_records.filter(
-        payment_status='PAID'
-    ).count()
-
-
-    # -------------------------
-    # R&R
-    # -------------------------
+    if request.method != 'POST':
+        return redirect(
+            'project_workflow',
+            project_id=project.id
+        )
 
     rr_cases = RRCase.objects.filter(
         project=project
     )
 
-    total_rr = rr_cases.count()
+    for case in rr_cases:
 
-    completed_rr = rr_cases.filter(
-        rehabilitation_status='COMPLETED'
-    ).count()
+        old_status = case.rehabilitation_status
 
+        # Don't create duplicate audit records
+        # for cases already completed.
+        if str(old_status).upper() in [
+            'COMPLETED',
+            'COMPLETE',
+            'REHABILITATED'
+        ]:
+            continue
 
-    # -------------------------
-    # POSSESSION
-    # -------------------------
+        case.rehabilitation_status = 'COMPLETED'
 
-    possession_records = Possession.objects.filter(
-        parcel__project=project
-    )
-
-    total_possession = possession_records.count()
-
-    taken_possession = possession_records.filter(
-        possession_status='TAKEN'
-    ).count()
-
-
-    # -------------------------
-    # AUTOMATIC WORKFLOW
-    # -------------------------
-
-    if total_parcels == 0:
-
-        current_stage = "LAND IDENTIFICATION"
-        next_action = "Land parcels need to be identified."
-
-    elif verified_parcels < total_parcels:
-
-        current_stage = "LAND VERIFICATION"
-        next_action = "Verify all identified land parcels."
-
-    elif notified_parcels < total_parcels:
-
-        current_stage = "NOTIFICATION"
-        next_action = "Issue notification for verified parcels."
-
-    elif total_compensation == 0 or paid_compensation < total_compensation:
-
-        current_stage = "COMPENSATION"
-        next_action = "Complete compensation assessment and payment."
-
-    elif total_rr == 0 or completed_rr < total_rr:
-
-        current_stage = "R&R"
-        next_action = "Complete rehabilitation and resettlement activities."
-
-    elif possession_parcels < total_parcels:
-        current_stage = "POSSESSION"
-        next_action = "Complete possession of all acquired land parcels."
-    else:
-        current_stage = "COMPLETED"
-        next_action = "All acquisition workflow stages are completed."
-
-
-    context = {
-
-        'project': project,
-        'parcels': parcels,
-
-        'total_parcels': total_parcels,
-        'verified_parcels': verified_parcels,
-        'notified_parcels': notified_parcels,
-        'acquired_parcels': acquired_parcels,
-        'possession_parcels': possession_parcels,
-
-        'total_compensation': total_compensation,
-        'paid_compensation': paid_compensation,
-
-        'total_rr': total_rr,
-        'completed_rr': completed_rr,
-
-        'total_possession': total_possession,
-        'taken_possession': taken_possession,
-
-        'current_stage': current_stage,
-        'next_action': next_action,
-    }
-
-    return render(
-        request,
-        'land/project_workflow.html',
-        context
-    )
-
-@login_required
-def complete_rr(request, project_id):
-
-    project = Project.objects.get(id=project_id)
-
-    if request.method == 'POST':
-
-        rr_cases = RRCase.objects.filter(
-            project=project
+        case.save(
+            update_fields=[
+                'rehabilitation_status'
+            ]
         )
 
-        for case in rr_cases:
-
-            case.rehabilitation_status = 'COMPLETED'
-            case.save()
+        log_audit(
+            user=request.user,
+            action='STATUS_CHANGE',
+            instance=case,
+            description=(
+                f'Changed R&R rehabilitation status from '
+                f'"{old_status}" to "COMPLETED" for family '
+                f'"{case.family_id}" in project '
+                f'"{project.project_name}".'
+            )
+        )
 
     return redirect(
         'project_workflow',
@@ -1247,31 +1249,117 @@ def complete_rr(request, project_id):
 @login_required
 def complete_possession(request, project_id):
 
-    project = Project.objects.get(id=project_id)
+    project = get_object_or_404(
+        Project,
+        id=project_id
+    )
 
-    if request.method == 'POST':
-
-        parcels = project.parcels.filter(
-            status__in=['ACQUIRED', 'POSSESSION']
+    if request.method != 'POST':
+        return redirect(
+            'project_workflow',
+            project_id=project.id
         )
 
-        for parcel in parcels:
+    parcels = project.parcels.filter(
+        status__in=['ACQUIRED', 'POSSESSION']
+    )
 
-            possession, created = Possession.objects.get_or_create(
-                parcel=parcel
-            )
+    for parcel in parcels:
+
+        possession, created = Possession.objects.get_or_create(
+            parcel=parcel
+        )
+
+        old_possession_status = possession.possession_status
+        old_parcel_status = parcel.status
+
+        # -------------------------
+        # POSSESSION RECORD
+        # -------------------------
+
+        if old_possession_status != 'TAKEN':
 
             possession.possession_status = 'TAKEN'
             possession.possession_date = timezone.now().date()
-            possession.remarks = 'Possession taken through NLAMS workflow.'
-            possession.save()
+            possession.remarks = (
+                'Possession taken through NLAMS workflow.'
+            )
+
+            possession.save(
+                update_fields=[
+                    'possession_status',
+                    'possession_date',
+                    'remarks'
+                ]
+            )
+
+            log_audit(
+                user=request.user,
+                action='STATUS_CHANGE',
+                instance=possession,
+                description=(
+                    f'Changed possession status for parcel '
+                    f'"{parcel.parcel_id}" from '
+                    f'"{old_possession_status}" to "TAKEN" '
+                    f'in project '
+                    f'"{project.project_name}".'
+                )
+            )
+
+        # -------------------------
+        # LAND PARCEL STATUS
+        # -------------------------
+
+        if old_parcel_status != 'POSSESSION':
 
             parcel.status = 'POSSESSION'
-            parcel.save()
 
-        # Mark project as completed
+            parcel.save(
+                update_fields=[
+                    'status'
+                ]
+            )
+
+            log_audit(
+                user=request.user,
+                action='STATUS_CHANGE',
+                instance=parcel,
+                description=(
+                    f'Changed land parcel status for '
+                    f'"{parcel.parcel_id}" from '
+                    f'"{old_parcel_status}" to "POSSESSION" '
+                    f'in project '
+                    f'"{project.project_name}".'
+                )
+            )
+
+    # -------------------------
+    # PROJECT COMPLETION
+    # -------------------------
+
+    old_project_status = project.status
+
+    if old_project_status != 'COMPLETED':
+
         project.status = 'COMPLETED'
-        project.save()
+
+        project.save(
+            update_fields=[
+                'status'
+            ]
+        )
+
+        log_audit(
+            user=request.user,
+            action='STATUS_CHANGE',
+            instance=project,
+            description=(
+                f'Project "{project.project_name}" status '
+                f'changed from "{old_project_status}" '
+                f'to "COMPLETED" after possession was taken '
+                f'for all acquired parcels.'
+            )
+        )
 
     return redirect(
         'project_workflow',
@@ -1370,26 +1458,65 @@ def land_parcels(request):
 @login_required
 def process_payment(request, compensation_id):
 
-    compensation = Compensation.objects.get(
+    compensation = get_object_or_404(
+        Compensation.objects.select_related(
+            'parcel',
+            'parcel__project'
+        ),
         id=compensation_id
     )
 
-    if request.method == 'POST':
+    # Payment changes must only happen through POST.
+    if request.method != 'POST':
+        return redirect(
+            'project_workflow',
+            project_id=compensation.parcel.project.id
+        )
 
-        compensation.paid_amount = compensation.assessed_amount
-        compensation.payment_status = 'PAID'
-        compensation.payment_date = timezone.now().date()
+    # Prevent processing the same payment twice.
+    if compensation.payment_status == 'PAID':
+        return redirect(
+            'project_workflow',
+            project_id=compensation.parcel.project.id
+        )
 
-        compensation.save()
+    old_status = compensation.payment_status
+    old_paid_amount = compensation.paid_amount
 
-    return redirect('project_workflow', compensation.parcel.project.id)
+    compensation.paid_amount = compensation.assessed_amount
+    compensation.payment_status = 'PAID'
+    compensation.payment_date = timezone.now().date()
 
+    compensation.save(
+        update_fields=[
+            'paid_amount',
+            'payment_status',
+            'payment_date'
+        ]
+    )
+
+    log_audit(
+        user=request.user,
+        action='PAYMENT',
+        instance=compensation,
+        description=(
+            f'Processed compensation payment for parcel '
+            f'"{compensation.parcel.parcel_id}" in project '
+            f'"{compensation.parcel.project.project_name}". '
+            f'Payment status changed from "{old_status}" to "PAID". '
+            f'Paid amount changed from ₹{old_paid_amount} '
+            f'to ₹{compensation.paid_amount}.'
+        )
+    )
+
+    return redirect(
+        'project_workflow',
+        project_id=compensation.parcel.project.id
+    )
 
 @login_required
 def create_parcel(request):
-
     if request.method == 'POST':
-
         project_id = request.POST.get('project')
         parcel_id = request.POST.get('parcel_id')
         owner_name = request.POST.get('owner_name')
@@ -1397,37 +1524,138 @@ def create_parcel(request):
         latitude = request.POST.get('latitude')
         longitude = request.POST.get('longitude')
         status = request.POST.get('status')
+        boundary_json = request.POST.get('boundary')
+        print("BOUNDARY RECEIVED:", boundary_json)
 
-        project = Project.objects.get(id=project_id)
+        project = get_object_or_404(Project, id=project_id)
 
-        LandParcel.objects.create(
+        # Create GIS point from latitude/longitude
+        location = Point(
+            float(longitude),
+            float(latitude),
+            srid=4326
+        )
+
+        # Create GIS polygon if a boundary was drawn
+        boundary_geometry = None
+        coordinates = []
+
+        if boundary_json:
+            try:
+                coordinates = json.loads(boundary_json)
+
+                polygon_points = [
+                    (float(lng), float(lat))
+                    for lat, lng in coordinates
+                ]
+
+                if polygon_points[0] != polygon_points[-1]:
+                    polygon_points.append(polygon_points[0])
+
+                boundary_geometry = Polygon(
+                    polygon_points,
+                    srid=4326
+                )
+
+            except (ValueError, TypeError, IndexError, json.JSONDecodeError):
+                boundary_geometry = None
+                coordinates = []
+
+        parcel = LandParcel.objects.create(
             project=project,
             parcel_id=parcel_id,
             owner_name=owner_name,
             area=area,
             latitude=latitude,
             longitude=longitude,
+            location=location,
+            boundary_geometry=boundary_geometry,
+            boundary=coordinates,
             status=status
+        )
+
+        log_audit(
+            user=request.user,
+            action='CREATE',
+            instance=parcel,
+            description=(
+                f'Created land parcel "{parcel.parcel_id}" '
+                f'for project "{project.project_name}".'
+            )
         )
 
         return redirect('land_parcels')
 
     projects = Project.objects.all()
 
-    return render(request, 'land/create_parcel.html', {
-        'projects': projects
-    })
-
+    return render(
+        request,
+        'land/create_parcel.html',
+        {'projects': projects}
+    )
 
 def compensation_list(request):
-    compensations = Compensation.objects.all().order_by('-created_at')
+
+    compensations = (
+        Compensation.objects
+        .select_related('parcel', 'parcel__project')
+        .order_by('-created_at')
+    )
 
     return render(
         request,
         'land/compensation.html',
-        {'compensations': compensations}
+        {
+            'compensations': compensations,
+        }
     )
 
+@login_required
+def create_possession(request):
+
+    if request.method == 'POST':
+
+        parcel_id = request.POST.get('parcel')
+        possession_status = request.POST.get('possession_status')
+        possession_date = request.POST.get('possession_date')
+        remarks = request.POST.get('remarks')
+
+        parcel = get_object_or_404(
+            LandParcel,
+            id=parcel_id
+        )
+
+        possession = Possession.objects.create(
+            parcel=parcel,
+            possession_status=possession_status,
+            possession_date=possession_date or None,
+            remarks=remarks
+        )
+
+        log_audit(
+            user=request.user,
+            action='CREATE',
+            instance=possession,
+            description=(
+                f'Created possession record for parcel '
+                f'"{parcel.parcel_id}" in project '
+                f'"{parcel.project.project_name}". '
+                f'Possession status: '
+                f'"{possession_status}".'
+            )
+        )
+
+        return redirect('possession_list')
+
+    parcels = LandParcel.objects.all()
+
+    return render(
+        request,
+        'land/create_possession.html',
+        {
+            'parcels': parcels,
+        }
+    )
 
 @login_required
 def create_compensation(request):
@@ -1436,20 +1664,35 @@ def create_compensation(request):
 
         parcel_id = request.POST.get('parcel')
         assessed_amount = request.POST.get('assessed_amount')
-        paid_amount = request.POST.get('paid_amount')
+        paid_amount = request.POST.get('paid_amount', 0)
         payment_status = request.POST.get('payment_status')
         payment_date = request.POST.get('payment_date')
         remarks = request.POST.get('remarks')
 
-        parcel = LandParcel.objects.get(id=parcel_id)
+        parcel = get_object_or_404(
+            LandParcel,
+            id=parcel_id
+        )
 
-        Compensation.objects.create(
+        compensation = Compensation.objects.create(
             parcel=parcel,
             assessed_amount=assessed_amount,
-            paid_amount=paid_amount,
+            paid_amount=paid_amount or 0,
             payment_status=payment_status,
             payment_date=payment_date or None,
             remarks=remarks
+        )
+
+        log_audit(
+            user=request.user,
+            action='CREATE',
+            instance=compensation,
+            description=(
+                f'Created compensation record for parcel '
+                f'"{parcel.parcel_id}" in project '
+                f'"{parcel.project.project_name}". '
+                f'Assessed amount: ₹{compensation.assessed_amount}.'
+            )
         )
 
         return redirect('compensation_list')
@@ -1459,7 +1702,9 @@ def create_compensation(request):
     return render(
         request,
         'land/create_compensation.html',
-        {'parcels': parcels}
+        {
+            'parcels': parcels,
+        }
     )
 
 def rr_list(request):
@@ -1471,18 +1716,27 @@ def rr_list(request):
 
 @login_required
 def create_rr(request):
+
     if request.method == 'POST':
+
         project_id = request.POST.get('project')
         family_id = request.POST.get('family_id')
         family_name = request.POST.get('family_name')
         displaced = request.POST.get('displaced') == 'on'
-        rehabilitation_status = request.POST.get('rehabilitation_status')
-        assistance_amount = request.POST.get('assistance_amount')
+        rehabilitation_status = request.POST.get(
+            'rehabilitation_status'
+        )
+        assistance_amount = request.POST.get(
+            'assistance_amount'
+        )
         remarks = request.POST.get('remarks')
 
-        project = Project.objects.get(id=project_id)
+        project = get_object_or_404(
+            Project,
+            id=project_id
+        )
 
-        RRCase.objects.create(
+        rr_case = RRCase.objects.create(
             project=project,
             family_id=family_id,
             family_name=family_name,
@@ -1492,13 +1746,29 @@ def create_rr(request):
             remarks=remarks
         )
 
+        log_audit(
+            user=request.user,
+            action='CREATE',
+            instance=rr_case,
+            description=(
+                f'Created R&R case for family '
+                f'"{rr_case.family_id}" '
+                f'("{rr_case.family_name}") in project '
+                f'"{project.project_name}".'
+            )
+        )
+
         return redirect('rr_list')
 
     projects = Project.objects.all()
 
-    return render(request, 'land/create_rr.html', {
-        'projects': projects
-    })
+    return render(
+        request,
+        'land/create_rr.html',
+        {
+            'projects': projects
+        }
+    )
 
 
 def possession_list(request):
@@ -1519,35 +1789,6 @@ def possession_list(request):
             'possessions': possessions,
             'taken_count': taken_count,
             'pending_count': pending_count,
-        }
-    )
-
-@login_required
-def create_possession(request):
-    if request.method == 'POST':
-        parcel_id = request.POST.get('parcel')
-        possession_status = request.POST.get('possession_status')
-        possession_date = request.POST.get('possession_date')
-        remarks = request.POST.get('remarks')
-
-        parcel = LandParcel.objects.get(id=parcel_id)
-
-        Possession.objects.create(
-            parcel=parcel,
-            possession_status=possession_status,
-            possession_date=possession_date or None,
-            remarks=remarks
-        )
-
-        return redirect('possession_list')
-
-    parcels = LandParcel.objects.all()
-
-    return render(
-        request,
-        'land/create_possession.html',
-        {
-            'parcels': parcels,
         }
     )
 
@@ -1741,13 +1982,31 @@ def site_photos(request, project_id):
             ).first()
 
         if photo:
-            SitePhoto.objects.create(
+            site_photo = SitePhoto.objects.create(
                 project=project,
                 parcel=parcel,
                 photo=photo,
                 caption=caption,
                 category=category,
                 uploaded_by=request.user
+            )
+
+            parcel_label = (
+                parcel.parcel_id
+                if parcel
+                else 'Project Level'
+            )
+
+            log_audit(
+                user=request.user,
+                action='UPLOAD',
+                instance=site_photo,
+                description=(
+                    f'Uploaded site photo for project '
+                    f'"{project.project_name}", '
+                    f'parcel "{parcel_label}", '
+                    f'category "{category}".'
+                )
             )
 
         return redirect(
@@ -1795,17 +2054,16 @@ def delete_site_photo(request, photo_id):
             else 'Project Level'
         )
 
-        AuditLog.objects.create(
-            user=request.user,
-            action='DELETE',
-            model_name='SitePhoto',
-            object_id=str(photo.id),
-            description=(
-                f'Deleted site photo from '
-                f'project "{photo.project.project_name}", '
-                f'parcel "{parcel_id}".'
-            )
-        )
+        log_audit(
+    user=request.user,
+    action='DELETE',
+    instance=photo,
+    description=(
+        f'Deleted site photo from '
+        f'project "{photo.project.project_name}", '
+        f'parcel "{parcel_id}".'
+    )
+)
 
         photo.delete()
 

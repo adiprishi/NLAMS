@@ -5,6 +5,20 @@
 
     <title>NLAMS - Add Land Parcel</title>
 
+    <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"
+/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
     <style>
 
         body {
@@ -141,6 +155,29 @@
             required
         >
 
+        <label>Parcel Boundary</label>
+
+<p style="color:#666; font-size:14px;">
+    Use the polygon tool on the map to draw the exact parcel boundary.
+</p>
+
+<div
+    id="parcel-map"
+    style="
+        height: 450px;
+        width: 100%;
+        margin-top: 10px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    "
+></div>
+
+<input
+    type="hidden"
+    name="boundary"
+    id="boundary"
+>
+
 
         <label>Acquisition Status</label>
 
@@ -166,6 +203,152 @@
     </a>
 
 </div>
+
+<script>
+
+    var defaultLat = 26.1445;
+    var defaultLng = 91.7362;
+
+    var map = L.map('parcel-map').setView(
+        [defaultLat, defaultLng],
+        13
+    );
+
+    L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+        {
+            attribution: 'Tiles &copy; Esri'
+        }
+    ).addTo(map);
+
+
+    // Layer containing the parcel being drawn
+    var drawnItems = new L.FeatureGroup();
+
+    map.addLayer(drawnItems);
+
+
+    // Drawing controls
+    var drawControl = new L.Control.Draw({
+
+        edit: {
+            featureGroup: drawnItems
+        },
+
+        draw: {
+            polygon: true,
+            rectangle: true,
+            polyline: false,
+            circle: false,
+            circlemarker: false,
+            marker: false
+        }
+
+    });
+
+    map.addControl(drawControl);
+
+
+    // When a polygon is finished
+    map.on(L.Draw.Event.CREATED, function(event) {
+
+        var layer = event.layer;
+
+        // Only allow one parcel boundary
+        drawnItems.clearLayers();
+
+        drawnItems.addLayer(layer);
+
+
+        // Convert Leaflet coordinates to JSON
+        var coordinates = layer.getLatLngs()[0].map(function(point) {
+
+            return [
+                point.lat,
+                point.lng
+            ];
+
+        });
+
+
+        // Store boundary in hidden form field
+        document.getElementById('boundary').value =
+            JSON.stringify(coordinates);
+
+    });
+
+
+    // When the boundary is edited
+    map.on(L.Draw.Event.EDITED, function(event) {
+
+        event.layers.eachLayer(function(layer) {
+
+            var coordinates =
+                layer.getLatLngs()[0].map(function(point) {
+
+                    return [
+                        point.lat,
+                        point.lng
+                    ];
+
+                });
+
+            document.getElementById('boundary').value =
+                JSON.stringify(coordinates);
+
+        });
+
+    });
+
+
+    // When the boundary is deleted
+    map.on(L.Draw.Event.DELETED, function() {
+
+        document.getElementById('boundary').value = '';
+
+    });
+
+
+    // Update map when latitude/longitude are entered
+    function updateMapLocation() {
+
+        var lat =
+            parseFloat(
+                document.querySelector('[name="latitude"]').value
+            );
+
+        var lng =
+            parseFloat(
+                document.querySelector('[name="longitude"]').value
+            );
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+
+            map.setView(
+                [lat, lng],
+                16
+            );
+
+        }
+
+    }
+
+
+    document
+        .querySelector('[name="latitude"]')
+        .addEventListener(
+            'change',
+            updateMapLocation
+        );
+
+    document
+        .querySelector('[name="longitude"]')
+        .addEventListener(
+            'change',
+            updateMapLocation
+        );
+
+</script>
 
 </body>
 

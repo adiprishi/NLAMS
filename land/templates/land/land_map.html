@@ -198,54 +198,116 @@ L.control.layers(baseMaps).addTo(map);
                 getParcelColor(status);
 
 
-            // Get actual boundary from Django
-            var polygonCoordinates =
-                JSON.parse(parcel.dataset.boundary);
+            // Get parcel coordinates
+var latitude = parseFloat(parcel.dataset.latitude);
+var longitude = parseFloat(parcel.dataset.longitude);
 
+var boundaryData = parcel.dataset.boundary;
+var mapObject = null;
 
-            // Create polygon
-            var polygon = L.polygon(
-    polygonCoordinates,
-    {
-        color: color,
-        fillColor: color,
-        fillOpacity: 0.25,
-        weight: 3,
-        opacity: 1,
-        dashArray: '8, 6',
+// ======================================
+// SHOW BOUNDARY IF AVAILABLE
+// ======================================
+
+if (
+    boundaryData &&
+    boundaryData !== 'None' &&
+    boundaryData !== 'null' &&
+    boundaryData.trim() !== ''
+) {
+
+    try {
+
+        var polygonCoordinates =
+            JSON.parse(boundaryData);
+
+        if (
+            Array.isArray(polygonCoordinates) &&
+            polygonCoordinates.length > 0
+        ) {
+
+            mapObject = L.polygon(
+                polygonCoordinates,
+                {
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.25,
+                    weight: 3,
+                    opacity: 1,
+                    dashArray: '8, 6',
+                }
+            ).addTo(map);
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            'Invalid boundary for parcel:',
+            parcel.dataset.parcelId,
+            error
+        );
+
     }
-).addTo(map);
+}
+
+// ======================================
+// FALLBACK: SHOW POINT LOCATION
+// ======================================
+
+if (
+    !mapObject &&
+    !isNaN(latitude) &&
+    !isNaN(longitude)
+) {
+
+    mapObject = L.circleMarker(
+        [latitude, longitude],
+        {
+            radius: 9,
+            color: color,
+            fillColor: color,
+            fillOpacity: 0.85,
+            weight: 3
+        }
+    ).addTo(map);
+
+}
 
 
             // ======================================
             // HOVER EFFECT
             // ======================================
 
-            polygon.on('mouseover', function() {
+            if (mapObject) {
 
-                polygon.setStyle({
-                    fillOpacity: 0.7,
-                    weight: 4
-                });
+    mapObject.on('mouseover', function() {
 
-            });
+        mapObject.setStyle({
+            fillOpacity: 0.7,
+            weight: 4
+        });
+
+    });
 
 
-            polygon.on('mouseout', function() {
+    mapObject.on('mouseout', function() {
 
-                polygon.setStyle({
-                    fillOpacity: 0.45,
-                    weight: 3
-                });
+        mapObject.setStyle({
+            fillOpacity: 0.45,
+            weight: 3
+        });
 
-            });
+    });
 
+}
 
             // ======================================
             // POPUP
             // ======================================
 
-          polygon.bindPopup(`
+          if (mapObject) {
+    mapObject.bindPopup(`
 
     <div class="parcel-popup">
 
@@ -318,9 +380,12 @@ L.control.layers(baseMaps).addTo(map);
     </div>
 
 `);
+}
 
 
-            allParcels.push(polygon);
+           if (mapObject) {
+    allParcels.push(mapObject);
+}
 
         });
 

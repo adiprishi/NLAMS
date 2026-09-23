@@ -294,11 +294,13 @@ class SitePhoto(models.Model):
 class AuditLog(models.Model):
 
     ACTION_CHOICES = [
-        ('CREATE', 'Created'),
-        ('UPDATE', 'Updated'),
-        ('DELETE', 'Deleted'),
-        ('UPLOAD', 'Uploaded'),
-    ]
+    ('CREATE', 'Created'),
+    ('UPDATE', 'Updated'),
+    ('DELETE', 'Deleted'),
+    ('UPLOAD', 'Uploaded'),
+    ('PAYMENT', 'Payment'),
+    ('STATUS_CHANGE', 'Status Change'),
+]
 
     user = models.ForeignKey(
         'auth.User',
