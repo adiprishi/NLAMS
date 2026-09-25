@@ -6,6 +6,12 @@ from django.http import JsonResponse, HttpResponse  # type: ignore[import-not-fo
 from django.contrib.auth import login, logout  # type: ignore[import-not-found]
 from django.contrib.auth.models import User  # type: ignore[import-not-found]
 from .utils import log_audit
+from .models import OfficerProfile
+from .decorators import (
+    role_required,
+    jurisdiction_required,
+    check_project_jurisdiction,
+)
 from .models import (
     Project,
     LandParcel,
@@ -18,6 +24,7 @@ from .models import (
 import jwt
 from jwt import PyJWKClient
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.db.models import Sum  # type: ignore[import-not-found]
@@ -799,7 +806,7 @@ def home(request):
         'possession_taken': possession_taken,
         'possession_pending': possession_pending,
 
-        
+
 
         # Projects
         'recent_projects': recent_projects,
@@ -1088,8 +1095,8 @@ def project_workflow(request, project_id):
         'land/project_workflow.html',
         context
     )
-
-@login_required
+@jurisdiction_required
+@role_required('ADMIN', 'CENTRAL', 'STATE', 'DISTRICT')
 def workflow_action(request, project_id):
 
     project = get_object_or_404(
@@ -1190,7 +1197,7 @@ def workflow_action(request, project_id):
         project_id=project.id
     )
 
-@login_required
+@role_required('ADMIN', 'CENTRAL', 'STATE', 'DISTRICT')
 def complete_rr(request, project_id):
 
     project = get_object_or_404(
@@ -1246,7 +1253,7 @@ def complete_rr(request, project_id):
         project_id=project.id
     )
 
-@login_required
+@role_required('ADMIN', 'CENTRAL', 'STATE', 'DISTRICT')
 def complete_possession(request, project_id):
 
     project = get_object_or_404(
@@ -1365,7 +1372,7 @@ def complete_possession(request, project_id):
         'project_workflow',
         project_id=project.id
     )
-@login_required
+@role_required('ADMIN', 'CENTRAL', 'STATE', 'DISTRICT')
 def create_project(request):
 
     if request.method == 'POST':
@@ -1374,6 +1381,29 @@ def create_project(request):
         project_type = request.POST.get('project_type')
         state = request.POST.get('state')
         district = request.POST.get('district')
+
+        profile = request.user.officer_profile
+
+        if profile.role == 'STATE':
+            if profile.state.strip().lower() != state.strip().lower():
+                messages.error(
+                    request,
+                    'You can only create projects within your assigned state.'
+                )
+                return redirect('create_project')
+
+        elif profile.role == 'DISTRICT':
+            if (
+                profile.state.strip().lower() != state.strip().lower()
+                or
+                profile.district.strip().lower() != district.strip().lower()
+            ):
+                messages.error(
+                    request,
+                    'You can only create projects within your assigned district.'
+                )
+                return redirect('create_project')
+
         land_required = request.POST.get('land_required')
         description = request.POST.get('description')
 
@@ -1398,7 +1428,8 @@ def project_detail(request, project_id):
         project_id=project_id
     )
 
-@login_required
+@jurisdiction_required
+@role_required('ADMIN', 'CENTRAL', 'STATE')
 def update_status(request, project_id):
 
     project = Project.objects.get(id=project_id)
@@ -1449,13 +1480,55 @@ def land_map(request):
     )
 
 
-def land_parcels(request):
-    parcels = LandParcel.objects.all().order_by('-created_at')
-    return render(request, 'land/land_parcels.html', {
-        'parcels': parcels
-    })
-
 @login_required
+def land_parcels(request):
+
+    profile = getattr(request.user, 'officer_profile', None)
+
+    if not profile:
+        messages.error(
+            request,
+            'Officer profile not found.'
+        )
+        return redirect('home')
+
+    if profile.role in ['ADMIN', 'CENTRAL']:
+
+        parcels = LandParcel.objects.all().order_by('-created_at')
+
+    elif profile.role == 'STATE':
+
+        parcels = LandParcel.objects.filter(
+            project__state__iexact=profile.state
+        ).order_by('-created_at')
+
+    elif profile.role == 'DISTRICT':
+
+        parcels = LandParcel.objects.filter(
+            project__state__iexact=profile.state,
+            project__district__iexact=profile.district
+        ).order_by('-created_at')
+
+    else:
+
+        # PIA and other read-only users
+        parcels = LandParcel.objects.none()
+
+    return render(
+        request,
+        'land/land_parcels.html',
+        {
+            'parcels': parcels,
+            'can_create': profile.role in [
+                'ADMIN',
+                'CENTRAL',
+                'STATE',
+                'DISTRICT'
+            ],
+        }
+    )
+
+@role_required('ADMIN', 'CENTRAL', 'STATE')
 def process_payment(request, compensation_id):
 
     compensation = get_object_or_404(
@@ -1465,6 +1538,17 @@ def process_payment(request, compensation_id):
         ),
         id=compensation_id
     )
+    allowed, message = check_project_jurisdiction(
+    request,
+    compensation.parcel.project
+)
+
+    if not allowed:
+        messages.error(request, message)
+        return redirect(
+            'project_workflow',
+            project_id=compensation.parcel.project.id
+        )
 
     # Payment changes must only happen through POST.
     if request.method != 'POST':
@@ -1514,7 +1598,7 @@ def process_payment(request, compensation_id):
         project_id=compensation.parcel.project.id
     )
 
-@login_required
+@role_required('ADMIN', 'CENTRAL', 'STATE', 'DISTRICT')
 def create_parcel(request):
     if request.method == 'POST':
         project_id = request.POST.get('project')
@@ -1528,6 +1612,12 @@ def create_parcel(request):
         print("BOUNDARY RECEIVED:", boundary_json)
 
         project = get_object_or_404(Project, id=project_id)
+
+        allowed, message = check_project_jurisdiction(request, project)
+
+        if not allowed:
+            messages.error(request, message)
+            return redirect('land_parcels')
 
         # Create GIS point from latitude/longitude
         location = Point(
@@ -1586,21 +1676,78 @@ def create_parcel(request):
 
         return redirect('land_parcels')
 
-    projects = Project.objects.all()
+    profile = request.user.officer_profile
+
+    if profile.role in ['ADMIN', 'CENTRAL']:
+
+        projects = Project.objects.all()
+
+    elif profile.role == 'STATE':
+
+        projects = Project.objects.filter(
+            state__iexact=profile.state
+        )
+
+    elif profile.role == 'DISTRICT':
+
+        projects = Project.objects.filter(
+            state__iexact=profile.state,
+            district__iexact=profile.district
+        )
+
+    else:
+
+        projects = Project.objects.none()
+
+    projects = projects.order_by('project_name')
 
     return render(
         request,
         'land/create_parcel.html',
-        {'projects': projects}
+        {
+            'projects': projects
+        }
     )
 
+@login_required
 def compensation_list(request):
+
+    profile = getattr(request.user, 'officer_profile', None)
+
+    if not profile:
+        messages.error(
+            request,
+            'Officer profile not found.'
+        )
+        return redirect('home')
 
     compensations = (
         Compensation.objects
         .select_related('parcel', 'parcel__project')
-        .order_by('-created_at')
     )
+
+    if profile.role in ['ADMIN', 'CENTRAL']:
+
+        pass
+
+    elif profile.role == 'STATE':
+
+        compensations = compensations.filter(
+            parcel__project__state__iexact=profile.state
+        )
+
+    elif profile.role == 'DISTRICT':
+
+        compensations = compensations.filter(
+            parcel__project__state__iexact=profile.state,
+            parcel__project__district__iexact=profile.district
+        )
+
+    else:
+
+        compensations = compensations.none()
+
+    compensations = compensations.order_by('-created_at')
 
     return render(
         request,
@@ -1609,8 +1756,7 @@ def compensation_list(request):
             'compensations': compensations,
         }
     )
-
-@login_required
+@role_required('ADMIN', 'CENTRAL', 'STATE', 'DISTRICT')
 def create_possession(request):
 
     if request.method == 'POST':
@@ -1624,6 +1770,15 @@ def create_possession(request):
             LandParcel,
             id=parcel_id
         )
+
+        allowed, message = check_project_jurisdiction(
+            request,
+            parcel.project
+        )
+
+        if not allowed:
+            messages.error(request, message)
+            return redirect('possession_list')
 
         possession = Possession.objects.create(
             parcel=parcel,
@@ -1657,7 +1812,7 @@ def create_possession(request):
         }
     )
 
-@login_required
+@role_required('ADMIN', 'CENTRAL', 'STATE', 'DISTRICT')
 def create_compensation(request):
 
     if request.method == 'POST':
@@ -1670,9 +1825,18 @@ def create_compensation(request):
         remarks = request.POST.get('remarks')
 
         parcel = get_object_or_404(
-            LandParcel,
+            LandParcel.objects.select_related('project'),
             id=parcel_id
         )
+
+        allowed, message = check_project_jurisdiction(
+            request,
+            parcel.project
+        )
+
+        if not allowed:
+            messages.error(request, message)
+            return redirect('compensation_list')
 
         compensation = Compensation.objects.create(
             parcel=parcel,
@@ -1697,7 +1861,35 @@ def create_compensation(request):
 
         return redirect('compensation_list')
 
-    parcels = LandParcel.objects.all()
+    profile = request.user.officer_profile
+
+    if profile.role in ['ADMIN', 'CENTRAL']:
+
+        parcels = LandParcel.objects.all()
+
+    elif profile.role == 'STATE':
+
+        parcels = LandParcel.objects.filter(
+            project__state__iexact=profile.state
+        )
+
+    elif profile.role == 'DISTRICT':
+
+        parcels = LandParcel.objects.filter(
+            project__state__iexact=profile.state,
+            project__district__iexact=profile.district
+        )
+
+    else:
+
+        parcels = LandParcel.objects.none()
+
+    parcels = parcels.select_related(
+        'project'
+    ).order_by(
+        'project__project_name',
+        'parcel_id'
+    )
 
     return render(
         request,
@@ -1707,14 +1899,53 @@ def create_compensation(request):
         }
     )
 
-def rr_list(request):
-    rr_cases = RRCase.objects.all().order_by('-created_at')
-    return render(request, 'land/rr.html', {
-        'rr_cases': rr_cases
-    })
-
-
 @login_required
+def rr_list(request):
+
+    profile = getattr(request.user, 'officer_profile', None)
+
+    if not profile:
+        messages.error(
+            request,
+            'Officer profile not found.'
+        )
+        return redirect('home')
+
+    rr_cases = RRCase.objects.all()
+
+    if profile.role in ['ADMIN', 'CENTRAL']:
+
+        pass
+
+    elif profile.role == 'STATE':
+
+        rr_cases = rr_cases.filter(
+            project__state__iexact=profile.state
+        )
+
+    elif profile.role == 'DISTRICT':
+
+        rr_cases = rr_cases.filter(
+            project__state__iexact=profile.state,
+            project__district__iexact=profile.district
+        )
+
+    else:
+
+        rr_cases = rr_cases.none()
+
+    rr_cases = rr_cases.order_by('-created_at')
+
+    return render(
+        request,
+        'land/rr.html',
+        {
+            'rr_cases': rr_cases,
+        }
+    )
+
+@jurisdiction_required
+@role_required('ADMIN', 'CENTRAL', 'STATE', 'DISTRICT')
 def create_rr(request):
 
     if request.method == 'POST':
@@ -1735,6 +1966,11 @@ def create_rr(request):
             Project,
             id=project_id
         )
+        allowed, message = check_project_jurisdiction(request, project)
+
+        if not allowed:
+            messages.error(request, message)
+            return redirect('rr_list')
 
         rr_case = RRCase.objects.create(
             project=project,
@@ -1760,7 +1996,32 @@ def create_rr(request):
 
         return redirect('rr_list')
 
-    projects = Project.objects.all()
+    profile = request.user.officer_profile
+
+    if profile.role in ['ADMIN', 'CENTRAL']:
+
+        projects = Project.objects.all()
+
+    elif profile.role == 'STATE':
+
+        projects = Project.objects.filter(
+            state__iexact=profile.state
+        )
+
+    elif profile.role == 'DISTRICT':
+
+        projects = Project.objects.filter(
+            state__iexact=profile.state,
+            district__iexact=profile.district
+        )
+
+    else:
+
+        projects = Project.objects.none()
+
+    projects = projects.order_by(
+        'project_name'
+    )
 
     return render(
         request,
@@ -1915,17 +2176,42 @@ def supabase_login(request):
                 status=401
             )
 
-        user, created = User.objects.get_or_create(
-            username=email,
-            defaults={
-                'email': email
-            }
-        )
+        user = User.objects.filter(
+            email__iexact=email
+        ).first()
+
+        if not user:
+            return JsonResponse(
+                {
+                    'error': (
+                        'Your account has not been provisioned '
+                        'as an NLAMS officer.'
+                    )
+                },
+                status=403
+            )
+
+        profile = getattr(user, 'officer_profile', None)
+
+        if not profile:
+            return JsonResponse(
+                {
+                    'error': (
+                        'Your account has not been assigned '
+                        'an NLAMS officer profile.'
+                    )
+                },
+                status=403
+            )
 
         login(request, user)
 
         return JsonResponse({
-            'success': True
+            'success': True,
+            'role': profile.role,
+            'department': profile.department,
+            'state': profile.state,
+            'district': profile.district,
         })
 
     except jwt.ExpiredSignatureError:
@@ -1957,8 +2243,65 @@ def supabase_login(request):
             {'error': 'Authentication verification failed'},
             status=401
         )
-
 @login_required
+@role_required('ADMIN')
+def officer_management(request):
+
+    if request.method == 'POST':
+
+        email = request.POST.get('email', '').strip()
+        role = request.POST.get('role')
+        department = request.POST.get('department', '').strip()
+        state = request.POST.get('state', '').strip()
+        district = request.POST.get('district', '').strip()
+
+        if not email or not role:
+            messages.error(
+                request,
+                'Email and role are required.'
+            )
+            return redirect('officer_management')
+
+        user, created = User.objects.get_or_create(
+            username=email,
+            defaults={
+                'email': email
+            }
+        )
+
+        profile, profile_created = OfficerProfile.objects.update_or_create(
+            user=user,
+            defaults={
+                'role': role,
+                'department': department,
+                'state': state,
+                'district': district,
+            }
+        )
+
+        messages.success(
+            request,
+            f'Officer profile for {email} has been provisioned.'
+        )
+
+        return redirect('officer_management')
+
+    officers = OfficerProfile.objects.select_related(
+        'user'
+    ).order_by(
+        'user__email'
+    )
+
+    return render(
+        request,
+        'land/officer_management.html',
+        {
+            'officers': officers,
+        }
+    )
+
+@jurisdiction_required
+@role_required('ADMIN', 'CENTRAL', 'STATE', 'DISTRICT')
 def site_photos(request, project_id):
 
     project = get_object_or_404(
@@ -2036,7 +2379,8 @@ def site_photos(request, project_id):
             'parcels': parcels,
         }
     )
-@login_required
+@jurisdiction_required
+@role_required('ADMIN', 'CENTRAL', 'STATE', 'DISTRICT')
 def delete_site_photo(request, photo_id):
 
     photo = get_object_or_404(
@@ -2055,15 +2399,15 @@ def delete_site_photo(request, photo_id):
         )
 
         log_audit(
-    user=request.user,
-    action='DELETE',
-    instance=photo,
-    description=(
-        f'Deleted site photo from '
-        f'project "{photo.project.project_name}", '
-        f'parcel "{parcel_id}".'
-    )
-)
+            user=request.user,
+            action='DELETE',
+            instance=photo,
+            description=(
+                f'Deleted site photo from '
+                f'project "{photo.project.project_name}", '
+                f'parcel "{parcel_id}".'
+            )
+        )
 
         photo.delete()
 

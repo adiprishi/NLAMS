@@ -122,5 +122,11 @@ path(
     views.audit_logs,
     name='audit_logs'
 ),
+
+path(
+    'officers/',
+    views.officer_management,
+    name='officer_management'
+),
     
 ]

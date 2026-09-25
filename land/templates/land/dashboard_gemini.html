@@ -252,6 +252,13 @@
                 </div>
             </div>
 
+            {% if user.is_authenticated and user.officer_profile.role == 'ADMIN' %}
+    <a href="{% url 'officer_management' %}">
+        <i class="fas fa-user-shield"></i>
+        Officer Management
+    </a>
+{% endif %}
+
             <a href="{% url 'logout' %}"
                class="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-lg font-medium transition">
 

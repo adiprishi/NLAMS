@@ -330,3 +330,54 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.action} - {self.model_name}"
+
+class OfficerProfile(models.Model):
+
+    ROLE_CHOICES = [
+        ('ADMIN', 'Administrator'),
+        ('CENTRAL', 'Central Ministry'),
+        ('STATE', 'State Authority'),
+        ('DISTRICT', 'District Authority'),
+        ('PIA', 'Project Implementing Agency'),
+    ]
+
+    user = models.OneToOneField(
+        'auth.User',
+        on_delete=models.CASCADE,
+        related_name='officer_profile'
+    )
+
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default='DISTRICT'
+    )
+
+    department = models.CharField(
+        max_length=200,
+        blank=True
+    )
+
+    state = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    district = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    supabase_user_id = models.CharField(
+        max_length=100,
+        unique=True,
+        null=True,
+        blank=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"{self.user.email} - {self.get_role_display()}"

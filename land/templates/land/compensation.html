@@ -310,21 +310,25 @@
 
                         <td class="px-5 py-4">
 
-                            {% if compensation.payment_status == "PAID" %}
+                            {% if compensation.payment_status != 'PAID' %}
 
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-xs font-bold">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                    Fully Paid
-                                </span>
+    {% if user.officer_profile.role == 'ADMIN' or user.officer_profile.role == 'CENTRAL' or user.officer_profile.role == 'STATE' %}
 
-                            {% elif compensation.payment_status == "PARTIAL" %}
+        <form method="POST"
+              action="{% url 'process_payment' compensation.id %}">
 
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100 text-xs font-bold">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                    Partially Paid
-                                </span>
+            {% csrf_token %}
 
-                            {% else %}
+            <button type="submit"
+                    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-blue-700 text-white text-xs font-bold hover:bg-blue-800 transition whitespace-nowrap">
+                ₹ Process Payment
+            </button>
+
+        </form>
+
+    {% endif %}
+
+{% else %}
 
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 text-red-700 border border-red-100 text-xs font-bold">
                                     <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>

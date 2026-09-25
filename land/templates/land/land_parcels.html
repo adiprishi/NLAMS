@@ -77,9 +77,11 @@
             <p>View and manage land parcels associated with projects.</p>
         </div>
 
-        <a href="{% url 'create_parcel' %}" class="button">
-            + Add Land Parcel
-        </a>
+        {% if can_create %}
+    <a href="{% url 'create_parcel' %}" class="button">
+        + Add Land Parcel
+    </a>
+{% endif %}
 
     </div>
 

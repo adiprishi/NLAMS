@@ -136,67 +136,77 @@
 
                 <div class="flex flex-wrap gap-3">
 
-                    {% if current_stage == 'LAND IDENTIFICATION' or current_stage == 'LAND VERIFICATION' %}
+    {% if current_stage == 'LAND IDENTIFICATION' or current_stage == 'LAND VERIFICATION' %}
 
-                        <a href="{% url 'land_parcels' %}"
-                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
-                            🔍 Review Land Parcels
-                        </a>
+        <a href="{% url 'land_parcels' %}"
+           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+            🔍 Review Land Parcels
+        </a>
 
-                    {% elif current_stage == 'NOTIFICATION' %}
+    {% elif current_stage == 'NOTIFICATION' %}
 
-                        <form method="POST" action="{% url 'workflow_action' project.id %}">
-                            {% csrf_token %}
-                            <button type="submit"
-                                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
-                                📢 Issue Notification
-                            </button>
-                        </form>
+        {% if user.officer_profile.role == 'ADMIN' or user.officer_profile.role == 'CENTRAL' or user.officer_profile.role == 'STATE' or user.officer_profile.role == 'DISTRICT' %}
+            <form method="POST" action="{% url 'workflow_action' project.id %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+                    📢 Issue Notification
+                </button>
+            </form>
+        {% endif %}
 
-                    {% elif current_stage == 'COMPENSATION' %}
+    {% elif current_stage == 'COMPENSATION' %}
 
-                        <a href="{% url 'compensation_list' %}"
-                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
-                            💰 Review Compensation
-                        </a>
+        <a href="{% url 'compensation_list' %}"
+           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+            💰 Review Compensation
+        </a>
 
-                    {% elif current_stage == 'ACQUISITION' %}
+    {% elif current_stage == 'ACQUISITION' %}
 
-                        <form method="POST" action="{% url 'workflow_action' project.id %}">
-                            {% csrf_token %}
-                            <button type="submit"
-                                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
-                                ⚡ Complete Acquisition
-                            </button>
-                        </form>
+        {% if user.officer_profile.role == 'ADMIN' or user.officer_profile.role == 'CENTRAL' or user.officer_profile.role == 'STATE' or user.officer_profile.role == 'DISTRICT' %}
+            <form method="POST" action="{% url 'workflow_action' project.id %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+                    ⚡ Complete Acquisition
+                </button>
+            </form>
+        {% endif %}
 
-                    {% elif current_stage == 'R&R' %}
+    {% elif current_stage == 'R&R' %}
 
-                        <form method="POST" action="{% url 'complete_rr' project.id %}">
-                            {% csrf_token %}
-                            <button type="submit"
-                                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
-                                🏠 Complete R&R
-                            </button>
-                        </form>
+        {% if user.officer_profile.role == 'ADMIN' or user.officer_profile.role == 'CENTRAL' or user.officer_profile.role == 'STATE' or user.officer_profile.role == 'DISTRICT' %}
+            <form method="POST" action="{% url 'complete_rr' project.id %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+                    🏠 Complete R&R
+                </button>
+            </form>
+        {% endif %}
 
-                    {% elif current_stage == 'POSSESSION' %}
+    {% elif current_stage == 'POSSESSION' %}
 
-                        <form method="POST" action="{% url 'complete_possession' project.id %}">
-                            {% csrf_token %}
-                            <button type="submit"
-                                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
-                                📍 Take Possession
-                            </button>
-                        </form>
+        {% if user.officer_profile.role == 'ADMIN' or user.officer_profile.role == 'CENTRAL' or user.officer_profile.role == 'STATE' or user.officer_profile.role == 'DISTRICT' %}
+            <form method="POST" action="{% url 'complete_possession' project.id %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition">
+                    📍 Take Possession
+                </button>
+            </form>
+        {% endif %}
 
-                    {% elif current_stage == 'COMPLETED' %}
+    {% elif current_stage == 'COMPLETED' %}
 
-                        <div class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm font-bold">
-                            ✓ All workflow stages completed
-                        </div>
+        <div class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm font-bold">
+            ✓ All workflow stages completed
+        </div>
 
-                    {% endif %}
+    {% endif %}
+
+</div>
 
                 </div>
 

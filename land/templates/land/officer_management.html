@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Officer Management | NLAMS</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <style>
+        body {
+            background: #f4f7fb;
+            font-family: Arial, sans-serif;
+        }
+
+        .nlams-header {
+            background: #0b3d62;
+            color: white;
+            padding: 18px 30px;
+        }
+
+        .nlams-header h3 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .page-wrapper {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-title {
+            margin-bottom: 25px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-title {
+            font-weight: 700;
+            color: #0b3d62;
+        }
+
+        .btn-primary {
+            background: #0b3d62;
+            border-color: #0b3d62;
+        }
+
+        .btn-primary:hover {
+            background: #082f4c;
+            border-color: #082f4c;
+        }
+
+        .badge-role {
+            background: #0b3d62;
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="nlams-header">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+
+        <div>
+            <h3>
+                <i class="fa-solid fa-landmark"></i>
+                NLAMS
+            </h3>
+
+            <small>
+                National Land Acquisition & Management System
+            </small>
+        </div>
+
+        <div>
+            <a
+                href="{% url 'home' %}"
+                class="btn btn-light btn-sm me-2"
+            >
+                <i class="fa-solid fa-house"></i>
+                Dashboard
+            </a>
+
+            <a
+                href="{% url 'logout' %}"
+                class="btn btn-outline-light btn-sm"
+            >
+                Logout
+            </a>
+        </div>
+
+    </div>
+</header>
+
+
+<div class="page-wrapper">
+
+    <div class="page-title">
+        <h2>
+            <i class="fa-solid fa-user-shield"></i>
+            Officer Management
+        </h2>
+
+        <p class="text-muted">
+            Provision and manage authorized NLAMS officers.
+        </p>
+    </div>
+
+
+    <!-- Messages -->
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+
+    <!-- Provision Officer -->
+
+    <div class="card mb-4">
+
+        <div class="card-body p-4">
+
+            <h5 class="section-title mb-4">
+                <i class="fa-solid fa-user-plus"></i>
+                Provision Officer
+            </h5>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Officer Email
+                        </label>
+
+                        <input
+                            type="email"
+                            name="email"
+                            class="form-control"
+                            placeholder="officer@example.com"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Role
+                        </label>
+
+                        <select
+                            name="role"
+                            class="form-select"
+                            required
+                        >
+
+                            <option value="">
+                                Select Role
+                            </option>
+
+                            <option value="ADMIN">
+                                Administrator
+                            </option>
+
+                            <option value="CENTRAL">
+                                Central Ministry
+                            </option>
+
+                            <option value="STATE">
+                                State Authority
+                            </option>
+
+                            <option value="DISTRICT">
+                                District Authority
+                            </option>
+
+                            <option value="PIA">
+                                Project Implementing Agency
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Department
+                        </label>
+
+                        <input
+                            type="text"
+                            name="department"
+                            class="form-control"
+                            placeholder="Department / Authority"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+                            State
+                        </label>
+
+                        <input
+                            type="text"
+                            name="state"
+                            class="form-control"
+                            placeholder="Assam"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+                            District
+                        </label>
+
+                        <input
+                            type="text"
+                            name="district"
+                            class="form-control"
+                            placeholder="Kamrup"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="mt-4">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        <i class="fa-solid fa-user-check"></i>
+                        Provision Officer
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- Officer List -->
+
+    <div class="card">
+
+        <div class="card-body p-4">
+
+            <h5 class="section-title mb-4">
+                <i class="fa-solid fa-users-gear"></i>
+                Registered Officers
+            </h5>
+
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+
+                        <tr>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Department</th>
+                            <th>State</th>
+                            <th>District</th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for officer in officers %}
+
+                        <tr>
+
+                            <td>
+                                {{ officer.user.email }}
+                            </td>
+
+                            <td>
+                                <span class="badge badge-role">
+                                    {{ officer.get_role_display }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ officer.department|default:"—" }}
+                            </td>
+
+                            <td>
+                                {{ officer.state|default:"—" }}
+                            </td>
+
+                            <td>
+                                {{ officer.district|default:"—" }}
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="5"
+                                class="text-center text-muted py-4"
+                            >
+                                No officers have been provisioned yet.
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
